@@ -1,0 +1,23 @@
+{
+    "name": "mootensai/yii2-relation-trait",
+    "type": "library",
+    "description": "Yii 2 Models add functionality for load with relation, & transactional save with relation",
+    "keywords": ["Yii2","relation","load","save","transaction","loadwithrelation", "savewithrelation"],
+    "homepage": "http://github.com/mootensai/yii2-relation-trait",
+    "license": "none",
+    "authors": [
+        {
+            "name": "Yohanes Candrajaya",
+            "email": "moo.tensai@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+	"psr-4": {
+		"mootensai\\relation": ""
+	}
+    }
+}
