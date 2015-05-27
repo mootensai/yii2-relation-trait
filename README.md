@@ -4,8 +4,14 @@ Yii 2 Models add functionality for load with relation, &amp; transactional save 
 It takes a normal array of POST. This is the example
 
 ```php
+// sample at controller
 $POST['ParentClass'] = [''attr1' => 'value1','attr2' => 'value2'];
-$POST['RelatedClass'][0] = ['attr1' => 'value1','attr2' => 'value2'];        
+$POST['RelatedClass'][0] = ['attr1' => 'value1','attr2' => 'value2'];      
+if($model->loadRelated($POST){
+    if($model->saveRelated()){
+        return $this->redirect(['view', 'id' => $model->id, 'created' => $model->created]);
+    }
+}
 ```
 
 This can be used by model.
