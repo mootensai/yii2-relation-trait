@@ -8,7 +8,6 @@
  */
 namespace mootensai\relation;
 
-use \ReflectionClass;
 use \yii\db\ActiveRecord;
 use \yii\db\Exception;
 use \yii\helpers\Inflector;
@@ -112,5 +111,28 @@ trait RelationTrait{
             $trans->rollBack();
             throw $exc;
         }
+    }
+    
+    public function getAttributesWithRelatedAsPost(){
+        $return = [];
+        $shortName = \yii\helpers\StringHelper::basename(get_class($this));
+        $return[$shortName] = $this->attributes;
+        foreach($this->relatedRecords as $records){
+            foreach($records as $index => $record){
+                $shortNameRel = \yii\helpers\StringHelper::basename(get_class($record));
+                $return[$shortNameRel][$index] = $record->attributes;
+            }
+        }
+        return $return;
+    }
+    
+    public function getAttributesWithRelated(){
+        $return = $this->attributes;
+        foreach($this->relatedRecords as $name => $records){
+            foreach($records as $index => $record){
+                $return[$name][$index] = $record->attributes;
+            }
+        }
+        return $return;
     }
 }
