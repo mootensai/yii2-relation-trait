@@ -17,7 +17,7 @@ trait RelationTrait{
     
     public function loadRelated($POST) {
         if ($this->load($POST)) {
-            $shortName = \yii\helpers\StringHelper::basename(get_class($this));
+            $shortName = StringHelper::basename(get_class($this));
             foreach ($POST as $key => $value) {
                 if ($key != $shortName && strpos($key, '_') === false) {
                     $isHasMany = is_array($value);
@@ -115,11 +115,11 @@ trait RelationTrait{
     
     public function getAttributesWithRelatedAsPost(){
         $return = [];
-        $shortName = \yii\helpers\StringHelper::basename(get_class($this));
+        $shortName = StringHelper::basename(get_class($this));
         $return[$shortName] = $this->attributes;
         foreach($this->relatedRecords as $records){
             foreach($records as $index => $record){
-                $shortNameRel = \yii\helpers\StringHelper::basename(get_class($record));
+                $shortNameRel = StringHelper::basename(get_class($record));
                 $return[$shortNameRel][$index] = $record->attributes;
             }
         }
