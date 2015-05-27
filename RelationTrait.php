@@ -55,7 +55,6 @@ trait RelationTrait{
                 foreach ($this->relatedRecords as $name => $records) {
                     $AQ = $this->getRelation($name);
                     $link = $AQ->link;
-                    $notDeletedFK = [];
                     $notDeletedPK = [];
                     $relPKAttr = $records[0]->primaryKey();
                     $isCompositePK = (count($relPKAttr) > 1);
