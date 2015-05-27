@@ -3,7 +3,7 @@
 /**
  * RelationTrait
  *
- * @author Moo Tensai<moo.tensai@gmail.com>
+ * @author Yohanes Candrajaya <moo.tensai@gmail.com>
  * @since 1.0
  */
 namespace mootensai\relation;
