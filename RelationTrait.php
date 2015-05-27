@@ -1,16 +1,23 @@
 <?php
 
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * RelationTrait
+ *
+ * @author Moo Tensai<moo.tensai@gmail.com>
+ * @since 1.0
  */
 namespace mootensai\relation;
+
+use \ReflectionClass;
+use \yii\db\ActiveRecord;
+use \yii\db\Exception;
+use \yii\helpers\Inflector;
+use \yii\helpers\StringHelper;
 trait RelationTrait{
     
-    public function loadWithRelation($POST) {
+    public function loadRelated($POST) {
         if ($this->load($POST)) {
-            $reflector = new \ReflectionClass($this);
+            $reflector = new ReflectionClass($this);
             $shortName = $reflector->getShortName();
             foreach ($POST as $key => $value) {
                 if ($key != $shortName && strpos($key, '_') === false) {
@@ -20,7 +27,7 @@ trait RelationTrait{
                     if ($isHasMany) {
                         $container = [];
                         foreach ($value as $relPost) {
-                            /* @var $relObj \yii\db\ActiveRecord */
+                            /* @var $relObj ActiveRecord */
                             $relObj = new $rel->modelClass;
                             $relObj->load($relPost, '');
                             $container[] = $relObj;
@@ -39,7 +46,7 @@ trait RelationTrait{
         }
     }
     
-    public function saveWithRelation() {
+    public function saveRelated() {
         /* @var $this ActiveRecord */
         $db = $this->getDb();
         $trans = $db->beginTransaction();
