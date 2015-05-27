@@ -18,8 +18,7 @@ trait RelationTrait{
     
     public function loadRelated($POST) {
         if ($this->load($POST)) {
-            $reflector = new ReflectionClass($this);
-            $shortName = $reflector->getShortName();
+            $shortName = \yii\helpers\StringHelper::basename(get_class($this));
             foreach ($POST as $key => $value) {
                 if ($key != $shortName && strpos($key, '_') === false) {
                     $isHasMany = is_array($value);
