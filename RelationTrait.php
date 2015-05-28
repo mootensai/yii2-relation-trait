@@ -62,7 +62,7 @@ trait RelationTrait{
                     foreach($records as $index => $relModel){
                         foreach ($link as $key => $value){
                             $relModel->$key = $this->$value;
-                            $notDeletedFK[] = "$key = '{$this->$value}'";
+                            $notDeletedFK[$key] = "$key = '{$this->$value}'";
                         }
                         if(!$relModel->save()){
                             $relModelWords = Inflector::camel2words(StringHelper::basename($AQ->modelClass));
@@ -94,7 +94,8 @@ trait RelationTrait{
                             $relModel->deleteAll("$notDeletedFK AND ".implode(' AND ', $compiledNotDeletedPK));
                         }
                     }else{
-                        $relModel->deleteAll($notDeletedFK.' AND '.$relPKAttr[0]." NOT IN ($notDeletedFK)");
+                        $compiledNotDeletedPK = implode(',', $notDeletedPK);
+                        $relModel->deleteAll($notDeletedFK.' AND '.$relPKAttr[0]." NOT IN ($compiledNotDeletedPK)");
                     }
                 }
                 if ($error) {
