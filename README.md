@@ -5,16 +5,19 @@ It takes a normal array of POST. This is the example
 
 ```php
 // sample at controller
-$POST['ParentClass'] = [''attr1' => 'value1','attr2' => 'value2'];
-$POST['RelatedClass'][0] = ['attr1' => 'value1','attr2' => 'value2'];      
-if($model->loadRelated($POST){
-    if($model->saveRelated()){
-        return $this->redirect(['view', 'id' => $model->id, 'created' => $model->created]);
-    }
+//$_POST['ParentClass'] = [''attr1' => 'value1','attr2' => 'value2'];
+//$_POST['RelatedClass'][0] = ['attr1' => 'value1','attr2' => 'value2'];      
+if($model->loadRelated(Yii:$app->request->post()) && $model->saveRelated()){
+    return $this->redirect(['view', 'id' => $model->id, 'created' => $model->created]);
 }
 ```
 
-This can be used by model.
+usage at model
+```php
+class MyModel extends ActiveRecord{
+    use mootensai\relation\RelationTrait;
+}
+```
 
 output 
 ```php
