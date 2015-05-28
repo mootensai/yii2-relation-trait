@@ -5,7 +5,7 @@ It takes a normal array of POST. This is the example
 
 ```php
 // sample at controller
-//$_POST['ParentClass'] = [''attr1' => 'value1','attr2' => 'value2'];
+//$_POST['ParentClass'] = ['attr1' => 'value1','attr2' => 'value2'];
 //$_POST['RelatedClass'][0] = ['attr1' => 'value1','attr2' => 'value2'];      
 if($model->loadRelated(Yii:$app->request->post()) && $model->saveRelated()){
     return $this->redirect(['view', 'id' => $model->id, 'created' => $model->created]);
