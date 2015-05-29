@@ -20,7 +20,7 @@ or add
 to the `require` section of your `composer.json` file.
 
 
-##usage at model
+## Usage at model
 ```php
 class MyModel extends ActiveRecord{
     use mootensai\relation\RelationTrait;
@@ -87,12 +87,14 @@ Array
 )
 ```
 
-## Using transaction, so your data will be atomic
+## Using Transaction
+Your data will be atomic
 (see : http://en.wikipedia.org/wiki/ACID)
 
-## Use normal save, so your behavior still works
+## Use Normal Save
+so your behavior still works
 
-## Validation
+## Add Validation At Main Model
 ```php
 $form->errorSummary($model);
 ```
