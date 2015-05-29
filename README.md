@@ -20,14 +20,14 @@ or add
 to the `require` section of your `composer.json` file.
 
 
-## Usage at model
+## Usage At Model
 ```php
 class MyModel extends ActiveRecord{
     use mootensai\relation\RelationTrait;
 }
 ```
 
-## Array Input & Usage at Controller
+## Array Input & Usage At Controller
 It takes a normal array of POST. This is the example
 
 ```php
@@ -41,8 +41,9 @@ if($model->loadRelated(Yii:$app->request->post()) && $model->saveRelated()){
 
 #Features
 
-## array output  
+## Array Output  
 ```php
+// I use this to send model & related through JSON / Serialize
 print_r($model->getAttributesWithRelatedAsPost());
 ```
 
@@ -103,6 +104,6 @@ will give you
 <<Related Class Name>> #<<index + 1>> : <<error message>>
 My Related Model #1 : Attribute is required
 ```
-- it works on auto incremental PK or not (I have tried use UUID)
+## It Works On Auto Incremental PK Or Not (I Have Tried Use UUID)
 
 I'm open for any improvement
