@@ -19,5 +19,6 @@
 	"psr-4": {
 		"mootensai\\relation\\": ""
 	}
-    }
+    },
+    "version" : "1.0.0"
 }
