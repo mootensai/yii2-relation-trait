@@ -23,7 +23,7 @@ to the `require` section of your `composer.json` file.
 ## Usage At Model
 ```php
 class MyModel extends ActiveRecord{
-    use mootensai\relation\RelationTrait;
+    use \mootensai\relation\RelationTrait;
 }
 ```
 
