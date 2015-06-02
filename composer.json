@@ -5,7 +5,6 @@
     "keywords": ["Yii2","relation","load","save","transaction","loadwithrelation", "savewithrelation", "related"],
     "homepage": "http://github.com/mootensai/yii2-relation-trait",
     "license": "none",
-    "minimum-stability" : "stable",
     "authors": [
         {
             "name": "Yohanes Candrajaya",
@@ -13,8 +12,11 @@
             "role": "Developer"
         }
     ],
+    "minimum-stability": "stable",
+    "prefer-stable": true,
     "require": {
-        "php": ">=5.4.0"
+        "php": ">=5.4.0",
+        "yiisoft/yii2": "*"
     },
     "autoload": {
 	"psr-4": {
