@@ -5,6 +5,7 @@
     "keywords": ["Yii2","relation","load","save","transaction","loadwithrelation", "savewithrelation", "related"],
     "homepage": "http://github.com/mootensai/yii2-relation-trait",
     "license": "none",
+    "minimum-stability" : "stable",
     "authors": [
         {
             "name": "Yohanes Candrajaya",
@@ -17,8 +18,13 @@
     },
     "autoload": {
 	"psr-4": {
-		"mootensai\\relation\\": ""
+	    "mootensai\\relation\\": ""
 	}
     },
-    "version" : "1.0.0"
+    "version" : "1.0.0",
+    "extra": {
+	"branch-alias": {
+	    "dev-master": "1.0.x-dev"
+	}
+    }
 }
