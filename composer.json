@@ -12,21 +12,14 @@
             "role": "Developer"
         }
     ],
-    "minimum-stability": "stable",
-    "prefer-stable": true,
     "require": {
         "php": ">=5.4.0",
-        "yiisoft/yii2": "*"
+        "yiisoft/yii2": "~2.0"
     },
     "autoload": {
 	"psr-4": {
 	    "mootensai\\relation\\": ""
 	}
     },
-    "version" : "1.0.0",
-    "extra": {
-	"branch-alias": {
-	    "dev-master": "1.0.x-dev"
-	}
-    }
+    "version" : "1.0.0"
 }
