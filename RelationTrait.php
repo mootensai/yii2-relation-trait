@@ -15,7 +15,7 @@ use \yii\helpers\StringHelper;
 
 trait RelationTrait{
     
-    public function loadRelated($POST) {
+    public function loadAll($POST) {
         if ($this->load($POST)) {
             $shortName = StringHelper::basename(get_class($this));
             foreach ($POST as $key => $value) {
@@ -45,7 +45,7 @@ trait RelationTrait{
         }
     }
     
-    public function saveRelated() {
+    public function saveAll() {
         /* @var $this ActiveRecord */
         $db = $this->getDb();
         $trans = $db->beginTransaction();
