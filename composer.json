@@ -1,8 +1,8 @@
 {
     "name": "mootensai/yii2-relation-trait",
-    "type": "library",
+    "type": "BSD-3-Clause",
     "description": "Yii 2 Models load with relation, & transaction save with relation",
-    "keywords": ["Yii2","relation","load","save","transaction","loadwithrelation", "savewithrelation", "related"],
+    "keywords": ["Yii2","relation","load","save","transaction","loadwithrelation", "savewithrelation", "related", "saveall", "loadall"],
     "homepage": "http://github.com/mootensai/yii2-relation-trait",
     "license": "none",
     "authors": [
@@ -21,5 +21,4 @@
 	    "mootensai\\relation\\": ""
 	}
     },
-    "version" : "1.0.0"
 }
