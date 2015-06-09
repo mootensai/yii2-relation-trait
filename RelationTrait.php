@@ -84,18 +84,20 @@ trait RelationTrait{
                             }
                         }
                     }
-                    //DELETE WITH 'NOT IN' PK MODEL & REL MODEL
-                    $notDeletedFK = implode(' AND ', $notDeletedFK);
-                    if($isCompositePK){
-                        $compiledNotDeletedPK = [];
-                        foreach($notDeletedPK as $attr => $pks){
-                            $compiledNotDeletedPK[$attr] = "$attr NOT IN(".implode(', ', $pks).")";
-//                            echo "$notDeletedFK AND ".implode(' AND ', $compiledNotDeletedPK);
-                            $relModel->deleteAll("$notDeletedFK AND ".implode(' AND ', $compiledNotDeletedPK));
+                    if(!$this->isNewRecord){
+                        //DELETE WITH 'NOT IN' PK MODEL & REL MODEL
+                        $notDeletedFK = implode(' AND ', $notDeletedFK);
+                        if($isCompositePK){
+                            $compiledNotDeletedPK = [];
+                            foreach($notDeletedPK as $attr => $pks){
+                                $compiledNotDeletedPK[$attr] = "$attr NOT IN(".implode(', ', $pks).")";
+    //                            echo "$notDeletedFK AND ".implode(' AND ', $compiledNotDeletedPK);
+                                $relModel->deleteAll("$notDeletedFK AND ".implode(' AND ', $compiledNotDeletedPK));
+                            }
+                        }else{
+                            $compiledNotDeletedPK = implode(',', $notDeletedPK);
+                            $relModel->deleteAll($notDeletedFK.' AND '.$relPKAttr[0]." NOT IN ($compiledNotDeletedPK)");
                         }
-                    }else{
-                        $compiledNotDeletedPK = implode(',', $notDeletedPK);
-                        $relModel->deleteAll($notDeletedFK.' AND '.$relPKAttr[0]." NOT IN ($compiledNotDeletedPK)");
                     }
                 }
                 if ($error) {
