@@ -113,6 +113,7 @@ trait RelationTrait{
         }
     }
     
+    /* this function is deprecated*/
     public function getAttributesWithRelatedAsPost(){
         $return = [];
         $shortName = StringHelper::basename(get_class($this));
