@@ -23,20 +23,25 @@ trait RelationTrait{
                     $isHasMany = is_array($value);
                     $relName = ($isHasMany) ? lcfirst($key) . 's' : lcfirst($key);
                     $rel = $this->getRelation($relName);
-                    if ($isHasMany) {
-                        $container = [];
-                        foreach ($value as $relPost) {
-                            /* @var $relObj ActiveRecord */
+                    $relModelClass = $rel->modelClass;
+                    $relPKAttr = $relModelClass::primaryKey();
+//                    $isCompositePK = (count($relPKAttr) > 1);
+//                    if(!$isCompositePK){
+                        if ($isHasMany) {
+                            $container = [];
+                            foreach ($value as $relPost) {
+                                /* @var $relObj ActiveRecord */
+                                $relObj = (isset($relPost[$relPKAttr[0]])) ? $relModelClass::findOne($relPost[$relPKAttr[0]]) : new $rel->modelClass;
+                                $relObj->load($relPost, '');
+                                $container[] = $relObj;
+                            }
+                            $this->populateRelation($relName, $container);
+                        } else {
                             $relObj = new $rel->modelClass;
-                            $relObj->load($relPost, '');
-                            $container[] = $relObj;
+                            $relObj->load($value);
+                            $this->populateRelation($relName, $value);
                         }
-                        $this->populateRelation($relName, $container);
-                    } else {
-                        $relObj = new $rel->modelClass;
-                        $relObj->load($value);
-                        $this->populateRelation($relName, $value);
-                    }
+//                    }
                 }
             }
             return true;
