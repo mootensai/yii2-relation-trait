@@ -8,13 +8,13 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```bash
-$ composer require mootensai/yii2-relation-trait "dev-master"
+$ composer require mootensai/yii2-relation-trait
 ```
 
 or add
 
 ```
-"mootensai/yii2-relation-trait": "dev-master"
+"mootensai/yii2-relation-trait": "*"
 ```
 
 to the `require` section of your `composer.json` file.
