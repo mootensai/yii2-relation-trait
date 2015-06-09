@@ -80,7 +80,7 @@ trait RelationTrait{
                                     $notDeletedPK[$attr][] = "'$value'";
                                 }
                             }  else {
-                                $notDeletedPK[] = $relModel->primaryKey;
+                                $notDeletedPK[] = "'$relModel->primaryKey'";
                             }
                         }
                     }
