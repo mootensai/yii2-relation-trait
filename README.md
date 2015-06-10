@@ -1,5 +1,5 @@
 # yii2-relation-trait
-Yii 2 Models add functionality for load with relation, &amp; transactional save with relation
+Yii 2 Models add functionality for load with relation (loadAll($POST)), &amp; transactional save with relation (saveAll())
 
 ## Installation
 
