@@ -25,20 +25,20 @@ trait RelationTrait{
                     $rel = $this->getRelation($relName);
                     $relModelClass = $rel->modelClass;
                     $relPKAttr = $relModelClass::primaryKey();
-                        if ($isHasMany) {
-                            $container = [];
-                            foreach ($value as $relPost) {
-                                /* @var $relObj ActiveRecord */
-                                $relObj = (empty($relPost[$relPKAttr[0]])) ? new $rel->modelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
-                                $relObj->load($relPost, '');
-                                $container[] = $relObj;
-                            }
-                            $this->populateRelation($relName, $container);
-                        } else {
-                            $relObj = new $rel->modelClass;
-                            $relObj->load($value);
-                            $this->populateRelation($relName, $value);
+                    if ($isHasMany) {
+                        $container = [];
+                        foreach ($value as $relPost) {
+                            /* @var $relObj ActiveRecord */
+                            $relObj = (empty($relPost[$relPKAttr[0]])) ? new $rel->modelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
+                            $relObj->load($relPost, '');
+                            $container[] = $relObj;
                         }
+                        $this->populateRelation($relName, $container);
+                    } else {
+                        $relObj = new $rel->modelClass;
+                        $relObj->load($value);
+                        $this->populateRelation($relName, $value);
+                    }
                 }
             }
             return true;
