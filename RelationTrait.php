@@ -31,7 +31,7 @@ trait RelationTrait{
                             $container = [];
                             foreach ($value as $relPost) {
                                 /* @var $relObj ActiveRecord */
-                                $relObj = (isset($relPost[$relPKAttr[0]])) ? $relModelClass::findOne($relPost[$relPKAttr[0]]) : new $rel->modelClass;
+                                $relObj = (empty($relPost[$relPKAttr[0]])) ? new $rel->modelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
                                 $relObj->load($relPost, '');
                                 $container[] = $relObj;
                             }
