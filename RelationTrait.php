@@ -25,8 +25,6 @@ trait RelationTrait{
                     $rel = $this->getRelation($relName);
                     $relModelClass = $rel->modelClass;
                     $relPKAttr = $relModelClass::primaryKey();
-//                    $isCompositePK = (count($relPKAttr) > 1);
-//                    if(!$isCompositePK){
                         if ($isHasMany) {
                             $container = [];
                             foreach ($value as $relPost) {
@@ -41,7 +39,6 @@ trait RelationTrait{
                             $relObj->load($value);
                             $this->populateRelation($relName, $value);
                         }
-//                    }
                 }
             }
             return true;
@@ -96,7 +93,6 @@ trait RelationTrait{
                             $compiledNotDeletedPK = [];
                             foreach($notDeletedPK as $attr => $pks){
                                 $compiledNotDeletedPK[$attr] = "$attr NOT IN(".implode(', ', $pks).")";
-    //                            echo "$notDeletedFK AND ".implode(' AND ', $compiledNotDeletedPK);
                                 $relModel->deleteAll("$notDeletedFK AND ".implode(' AND ', $compiledNotDeletedPK));
                             }
                         }else{
