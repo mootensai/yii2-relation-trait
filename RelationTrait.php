@@ -14,8 +14,8 @@ use \yii\helpers\Inflector;
 use \yii\helpers\StringHelper;
 
 trait RelationTrait{
-    
-    public function loadAll($POST) {
+
+    public function loadRelated($POST) {
         if ($this->load($POST)) {
             $shortName = StringHelper::basename(get_class($this));
             foreach ($POST as $key => $value) {
@@ -27,20 +27,20 @@ trait RelationTrait{
                     $relPKAttr = $relModelClass::primaryKey();
 //                    $isCompositePK = (count($relPKAttr) > 1);
 //                    if(!$isCompositePK){
-                        if ($isHasMany) {
-                            $container = [];
-                            foreach ($value as $relPost) {
-                                /* @var $relObj ActiveRecord */
-                                $relObj = (empty($relPost[$relPKAttr[0]])) ? new $rel->modelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
-                                $relObj->load($relPost, '');
-                                $container[] = $relObj;
-                            }
-                            $this->populateRelation($relName, $container);
-                        } else {
-                            $relObj = new $rel->modelClass;
-                            $relObj->load($value);
-                            $this->populateRelation($relName, $value);
+                    if ($isHasMany) {
+                        $container = [];
+                        foreach ($value as $relPost) {
+                            /* @var $relObj ActiveRecord */
+                            $relObj = (empty($relPost[$relPKAttr[0]])) ? new $rel->modelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
+                            $relObj->load($relPost, '');
+                            $container[] = $relObj;
                         }
+                        $this->populateRelation($relName, $container);
+                    } else {
+                        $relObj = new $rel->modelClass;
+                        $relObj->load($value);
+                        $this->populateRelation($relName, $value);
+                    }
 //                    }
                 }
             }
@@ -49,8 +49,8 @@ trait RelationTrait{
             return false;
         }
     }
-    
-    public function saveAll() {
+
+    public function saveRelated() {
         /* @var $this ActiveRecord */
         $db = $this->getDb();
         $trans = $db->beginTransaction();
@@ -96,7 +96,7 @@ trait RelationTrait{
                             $compiledNotDeletedPK = [];
                             foreach($notDeletedPK as $attr => $pks){
                                 $compiledNotDeletedPK[$attr] = "$attr NOT IN(".implode(', ', $pks).")";
-    //                            echo "$notDeletedFK AND ".implode(' AND ', $compiledNotDeletedPK);
+                                //                            echo "$notDeletedFK AND ".implode(' AND ', $compiledNotDeletedPK);
                                 $relModel->deleteAll("$notDeletedFK AND ".implode(' AND ', $compiledNotDeletedPK));
                             }
                         }else{
@@ -119,7 +119,7 @@ trait RelationTrait{
             throw $exc;
         }
     }
-    
+
     /* this function is deprecated*/
     public function getAttributesWithRelatedAsPost(){
         $return = [];
@@ -133,7 +133,7 @@ trait RelationTrait{
         }
         return $return;
     }
-    
+
     public function getAttributesWithRelated(){
         $return = $this->attributes;
         foreach($this->relatedRecords as $name => $records){
