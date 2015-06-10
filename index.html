@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Yii2-relation-trait : Yii 2 Models add functionality for load with relation, &amp; transactional save with relation">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Yii2-relation-trait</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/mootensai/yii2-relation-trait">View on GitHub</a>
+
+          <h1 id="project_title">Yii2-relation-trait</h1>
+          <h2 id="project_tagline">Yii 2 Models add functionality for load with relation, &amp; transactional save with relation</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/mootensai/yii2-relation-trait/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/mootensai/yii2-relation-trait/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="yii2-relation-trait" class="anchor" href="#yii2-relation-trait" aria-hidden="true"><span class="octicon octicon-link"></span></a>yii2-relation-trait</h1>
+
+<p>Yii 2 Models add functionality for load with relation (loadAll($POST)), &amp; transactional save with relation (saveAll())</p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>The preferred way to install this extension is through <a href="http://getcomposer.org/download/">composer</a>.</p>
+
+<p>Either run</p>
+
+<div class="highlight highlight-bash"><pre>$ composer require mootensai/yii2-relation-trait</pre></div>
+
+<p>or add</p>
+
+<pre><code>"mootensai/yii2-relation-trait": "*"
+</code></pre>
+
+<p>to the <code>require</code> section of your <code>composer.json</code> file.</p>
+
+<h2>
+<a id="usage-at-model" class="anchor" href="#usage-at-model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage At Model</h2>
+
+<div class="highlight highlight-php"><pre><span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">MyModel</span> <span class="pl-k">extends</span> <span class="pl-e">ActiveRecord</span>{</span>
+<span class="pl-s1">    <span class="pl-k">use</span> <span class="pl-c1">\mootensai\relation\RelationTrait</span>;</span>
+<span class="pl-s1">}</span></pre></div>
+
+<h2>
+<a id="array-input--usage-at-controller" class="anchor" href="#array-input--usage-at-controller" aria-hidden="true"><span class="octicon octicon-link"></span></a>Array Input &amp; Usage At Controller</h2>
+
+<p>It takes a normal array of POST. This is the example</p>
+
+<div class="highlight highlight-php"><pre><span class="pl-s1"><span class="pl-c">// sample at controller</span></span>
+<span class="pl-s1"><span class="pl-c">//$_POST['ParentClass'] = ['attr1' =&gt; 'value1','attr2' =&gt; 'value2'];</span></span>
+<span class="pl-s1"><span class="pl-c">//$_POST['RelatedClass'][0] = ['attr1' =&gt; 'value1','attr2' =&gt; 'value2'];      </span></span>
+<span class="pl-s1"><span class="pl-k">if</span>(<span class="pl-smi">$model</span><span class="pl-k">-&gt;</span>loadAll(<span class="pl-c1">Yii</span>:<span class="pl-smi">$app</span><span class="pl-k">-&gt;</span><span class="pl-smi">request</span><span class="pl-k">-&gt;</span>post()) <span class="pl-k">&amp;&amp;</span> <span class="pl-smi">$model</span><span class="pl-k">-&gt;</span>saveAll()){</span>
+<span class="pl-s1">    <span class="pl-k">return</span> <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>redirect([<span class="pl-s"><span class="pl-pds">'</span>view<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>id<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-smi">$model</span><span class="pl-k">-&gt;</span><span class="pl-smi">id</span>, <span class="pl-s"><span class="pl-pds">'</span>created<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-smi">$model</span><span class="pl-k">-&gt;</span><span class="pl-smi">created</span>]);</span>
+<span class="pl-s1">}</span></pre></div>
+
+<h1>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h1>
+
+<h2>
+<a id="array-output" class="anchor" href="#array-output" aria-hidden="true"><span class="octicon octicon-link"></span></a>Array Output</h2>
+
+<div class="highlight highlight-php"><pre><span class="pl-s1"><span class="pl-c">// I use this to send model &amp; related through JSON / Serialize</span></span>
+<span class="pl-s1"><span class="pl-c1">print_r</span>(<span class="pl-smi">$model</span><span class="pl-k">-&gt;</span>getAttributesWithRelatedAsPost());</span></pre></div>
+
+<pre><code>Array
+(
+    [MainClass] =&gt; Array
+        (
+            [attr1] =&gt; value1
+            [attr2] =&gt; value2
+        )
+
+    [RelatedClass] =&gt; Array
+        (
+            [0] =&gt; Array
+                (
+                    [attr1] =&gt; value1
+                    [attr2] =&gt; value2
+                )
+        )
+
+)
+</code></pre>
+
+<div class="highlight highlight-php"><pre><span class="pl-s1"><span class="pl-c1">print_r</span>(<span class="pl-smi">$model</span><span class="pl-k">-&gt;</span>getAttributesWithRelated());</span></pre></div>
+
+<pre><code>Array
+(
+    [attr1] =&gt; value1
+    [attr2] =&gt; value2
+    [relationName] =&gt; Array
+        (
+            [0] =&gt; Array
+                (
+                    [attr1] =&gt; value1
+                    [attr2] =&gt; value2
+                )
+        )
+)
+</code></pre>
+
+<h2>
+<a id="using-transaction" class="anchor" href="#using-transaction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using Transaction</h2>
+
+<p>Your data will be atomic
+(see : <a href="http://en.wikipedia.org/wiki/ACID">http://en.wikipedia.org/wiki/ACID</a>)</p>
+
+<h2>
+<a id="use-normal-save" class="anchor" href="#use-normal-save" aria-hidden="true"><span class="octicon octicon-link"></span></a>Use Normal Save</h2>
+
+<p>so your behavior still works</p>
+
+<h2>
+<a id="add-validation-at-main-model" class="anchor" href="#add-validation-at-main-model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Add Validation At Main Model</h2>
+
+<div class="highlight highlight-php"><pre><span class="pl-s1"><span class="pl-smi">$form</span><span class="pl-k">-&gt;</span>errorSummary(<span class="pl-smi">$model</span>);</span></pre></div>
+
+<p>will give you</p>
+
+<pre><code>&lt;&lt;Related Class Name&gt;&gt; #&lt;&lt;index + 1&gt;&gt; : &lt;&lt;error message&gt;&gt;
+My Related Model #1 : Attribute is required
+</code></pre>
+
+<h2>
+<a id="it-works-on-auto-incremental-pk-or-not-i-have-tried-use-uuid" class="anchor" href="#it-works-on-auto-incremental-pk-or-not-i-have-tried-use-uuid" aria-hidden="true"><span class="octicon octicon-link"></span></a>It Works On Auto Incremental PK Or Not (I Have Tried Use UUID)</h2>
+
+<h1>
+<a id="to-do" class="anchor" href="#to-do" aria-hidden="true"><span class="octicon octicon-link"></span></a>To Do</h1>
+
+<p>Test it on another DB. I only test it on MySQL.</p>
+
+<p>I'm open for any improvement</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Yii2-relation-trait maintained by <a href="https://github.com/mootensai">mootensai</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
