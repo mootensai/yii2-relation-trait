@@ -54,50 +54,52 @@ trait RelationTrait{
         try {
             if ($this->save()) {
                 $error = 0;
-                foreach ($this->relatedRecords as $name => $records) {
-                    $AQ = $this->getRelation($name);
-                    $link = $AQ->link;
-                    $notDeletedPK = [];
-                    $relPKAttr = $records[0]->primaryKey();
-                    $isCompositePK = (count($relPKAttr) > 1);
-                    /* @var $relModel ActiveRecord */
-                    foreach($records as $index => $relModel){
-                        foreach ($link as $key => $value){
-                            $relModel->$key = $this->$value;
-                            $notDeletedFK[$key] = "$key = '{$this->$value}'";
-                        }
-                        if(!$relModel->save()){
-                            $relModelWords = Inflector::camel2words(StringHelper::basename($AQ->modelClass));
-                            $index++;
-                            foreach ($relModel->errors as $validation){
-                                foreach($validation as $errorMsg){
-                                    $this->addError($name,"$relModelWords #$index : $errorMsg");
+                if (!empty($this->relatedRecords)) {
+                    foreach ($this->relatedRecords as $name => $records) {
+                        $AQ = $this->getRelation($name);
+                        $link = $AQ->link;
+                        $notDeletedPK = [];
+                        $relPKAttr = $records[0]->primaryKey();
+                        $isCompositePK = (count($relPKAttr) > 1);
+                        /* @var $relModel ActiveRecord */
+                        foreach($records as $index => $relModel){
+                            foreach ($link as $key => $value){
+                                $relModel->$key = $this->$value;
+                                $notDeletedFK[$key] = "$key = '{$this->$value}'";
+                            }
+                            if(!$relModel->save()){
+                                $relModelWords = Inflector::camel2words(StringHelper::basename($AQ->modelClass));
+                                $index++;
+                                foreach ($relModel->errors as $validation){
+                                    foreach($validation as $errorMsg){
+                                        $this->addError($name,"$relModelWords #$index : $errorMsg");
+                                    }
+                                }
+                                $error = 1;
+                            }else{
+                                //GET PK OF REL MODEL
+                                if($isCompositePK){
+                                    foreach($relModel->primaryKey as $attr => $value){
+                                        $notDeletedPK[$attr][] = "'$value'";
+                                    }
+                                }  else {
+                                    $notDeletedPK[] = "'$relModel->primaryKey'";
                                 }
                             }
-                            $error = 1;
-                        }else{
-                            //GET PK OF REL MODEL
+                        }
+                        if(!empty($notDeletedPK) && !empty($notDeletedFK)){
+                            //DELETE WITH 'NOT IN' PK MODEL & REL MODEL
+                            $notDeletedFK = implode(' AND ', $notDeletedFK);
                             if($isCompositePK){
-                                foreach($relModel->primaryKey as $attr => $value){
-                                    $notDeletedPK[$attr][] = "'$value'";
+                                $compiledNotDeletedPK = [];
+                                foreach($notDeletedPK as $attr => $pks){
+                                    $compiledNotDeletedPK[$attr] = "$attr NOT IN(".implode(', ', $pks).")";
+                                    $relModel->deleteAll("$notDeletedFK AND ".implode(' AND ', $compiledNotDeletedPK));
                                 }
-                            }  else {
-                                $notDeletedPK[] = "'$relModel->primaryKey'";
+                            }else{
+                                $compiledNotDeletedPK = implode(',', $notDeletedPK);
+                                $relModel->deleteAll($notDeletedFK.' AND '.$relPKAttr[0]." NOT IN ($compiledNotDeletedPK)");
                             }
-                        }
-                    }
-                    if(!$this->isNewRecord){
-                        //DELETE WITH 'NOT IN' PK MODEL & REL MODEL
-                        $notDeletedFK = implode(' AND ', $notDeletedFK);
-                        if($isCompositePK){
-                            $compiledNotDeletedPK = [];
-                            foreach($notDeletedPK as $attr => $pks){
-                                $compiledNotDeletedPK[$attr] = "$attr NOT IN(".implode(', ', $pks).")";
-                                $relModel->deleteAll("$notDeletedFK AND ".implode(' AND ', $compiledNotDeletedPK));
-                            }
-                        }else{
-                            $compiledNotDeletedPK = implode(',', $notDeletedPK);
-                            $relModel->deleteAll($notDeletedFK.' AND '.$relPKAttr[0]." NOT IN ($compiledNotDeletedPK)");
                         }
                     }
                 }
