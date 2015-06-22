@@ -88,12 +88,12 @@ Array
 )
 ```
 
-## Using Transaction
-Your data will be atomic
+## Use Transaction
+So your data will be atomic
 (see : http://en.wikipedia.org/wiki/ACID)
 
 ## Use Normal Save
-so your behavior still works
+So your behaviors still works
 
 ## Add Validation At Main Model
 ```php
@@ -105,6 +105,8 @@ will give you
 My Related Model #1 : Attribute is required
 ```
 ## It Works On Auto Incremental PK Or Not (I Have Tried Use UUID)
+See here if you want to use my behavior :
+https://github.com/mootensai/yii2-uuid-behavior
 
 #To Do
 Test it on another DB. I only test it on MySQL.
