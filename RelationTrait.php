@@ -180,16 +180,14 @@ trait RelationTrait {
             if($method->name === 'getAttributesWithRelated')  {continue;}
             if($method->name === 'deleteWithRelated')  {continue;}
             try {
-                $rel = $this->{$method->name}();
+                $rel = call_user_func(array($this,$method->name));
                 if($rel instanceof \yii\db\ActiveQuery){
                     $stack[$i]['name'] = lcfirst(str_replace('get', '', $method->name));
                     $stack[$i]['method'] = $method->name;
                     $stack[$i]['ismultiple'] = $rel->multiple;
                     $i++;
                 }
-            } catch (\yii\base\ErrorException $exc) {
-//                
-            }
+            } catch (\yii\base\ErrorException $exc) {}
         }
         return $stack;
     }
