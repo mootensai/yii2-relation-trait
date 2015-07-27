@@ -63,6 +63,7 @@ trait RelationTrait {
                     $isCompositePK = (count($relPKAttr) > 1);
                     /* @var $relModel ActiveRecord */
                     foreach ($records as $index => $relModel) {
+                        $notDeletedFK = [];
                         foreach ($link as $key => $value) {
                             $relModel->$key = $this->$value;
                             $notDeletedFK[$key] = "$key = '{$this->$value}'";
