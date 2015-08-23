@@ -29,8 +29,15 @@ trait RelationTrait {
                     if ($isHasMany) {
                         $container = [];
                         foreach ($value as $relPost) {
+                            $condition = [];
+                            foreach ($relPKAttr as $pk) {
+                                $condition[$pk] = isset($relPost[$pk]) ? $relPost[$pk] : null;
+                            }
                             /* @var $relObj ActiveRecord */
-                            $relObj = (empty($relPost[$relPKAttr[0]])) ? new $rel->modelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
+                            $relObj = $relModelClass::findOne($condition);
+                            if ($relObj === null) {
+                                $relObj = new $rel->modelClass;
+                            }
                             $relObj->load($relPost, '');
                             $container[] = $relObj;
                         }
