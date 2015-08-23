@@ -14,9 +14,11 @@ use \yii\db\Exception;
 use \yii\helpers\Inflector;
 use \yii\helpers\StringHelper;
 
+
 trait RelationTrait {
 
     public function loadAll($POST) {
+        /* @var $this ActiveRecord */
         if ($this->load($POST)) {
             $shortName = StringHelper::basename(get_class($this));
             foreach ($POST as $key => $value) {
@@ -64,16 +66,27 @@ trait RelationTrait {
                 $error = 0;
                 foreach ($this->relatedRecords as $name => $records) {
                     $AQ = $this->getRelation($name);
+                    $relModelClass = $AQ->modelClass;
+                    $relPKAttr = $relModelClass::primaryKey();
+
                     $link = $AQ->link;
-                    $notDeletedPK = [];
-                    $relPKAttr = $records[0]->primaryKey();
-                    $isCompositePK = (count($relPKAttr) > 1);
+                    $linkKeys = array_keys($link);
                     /* @var $relModel ActiveRecord */
+                    $deleteFK = [];
+                    $fk = key($link);
+                    $pk = current($link);
+                    $deleteFK[$fk] = $this->$pk;
+
+                    $notDeletePK = [];
                     foreach ($records as $index => $relModel) {
-                        $notDeletedFK = [];
                         foreach ($link as $key => $value) {
                             $relModel->$key = $this->$value;
-                            $notDeletedFK[$key] = "$key = '{$this->$value}'";
+                        }
+                        foreach ($relPKAttr as $pk) {
+                            if (in_array($pk, $linkKeys)) {
+                                continue;
+                            }
+                            $notDeletePK[$pk][] = $relModel->$pk;
                         }
                         $relSave = $relModel->save();
                         if (!$relSave || !empty($relModel->errors)) {
@@ -85,34 +98,15 @@ trait RelationTrait {
                                 }
                             }
                             $error = 1;
-                        } else {
-                            //GET PK OF REL MODEL
-                            if ($isCompositePK) {
-                                foreach ($relModel->primaryKey as $attr => $value) {
-                                    $notDeletedPK[$attr][] = "'$value'";
-                                }
-                            } else {
-                                $notDeletedPK[] = "'$relModel->primaryKey'";
-                            }
                         }
                     }
                     if (!$this->isNewRecord) {
                         //DELETE WITH 'NOT IN' PK MODEL & REL MODEL
-                        $notDeletedFK = implode(' AND ', $notDeletedFK);
-                        if ($isCompositePK) {
-                            $compiledNotDeletedPK = [];
-                            foreach ($notDeletedPK as $attr => $pks) {
-                                $compiledNotDeletedPK[$attr] = "$attr NOT IN(" . implode(', ', $pks) . ")";
-                                if (!empty($compiledNotDeletedPK[$attr])) {
-                                    $relModel->deleteAll("$notDeletedFK AND " . implode(' AND ', $compiledNotDeletedPK));
-                                }
-                            }
-                        } else {
-                            $compiledNotDeletedPK = implode(',', $notDeletedPK);
-                            if (!empty($compiledNotDeletedPK)) {
-                                $relModel->deleteAll($notDeletedFK . ' AND ' . $relPKAttr[0] . " NOT IN ($compiledNotDeletedPK)");
-                            }
+                        $condition = $deleteFK;
+                        foreach($notDeletePK as $pk => $values) {
+                            $condition = ['and', $condition, ['not in', $pk, $values]];
                         }
+                        $relModel->deleteAll($condition);
                     }
                 }
                 if ($error) {
