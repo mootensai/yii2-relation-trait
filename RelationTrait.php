@@ -27,7 +27,15 @@ trait RelationTrait {
                         foreach ($value as $relPost) {
                             $condition = [];
                             foreach ($relPKAttr as $pk) {
-                                $condition[$pk] = isset($relPost[$pk]) ? $relPost[$pk] : null;
+                                if (!empty($relPost[$pk])) {
+                                    $condition[$pk] = $relPost[$pk];
+                                } else {
+                                    if ($pk == key($rel->link)) {
+                                        $condition[$pk] =  $this->{current($rel->link)};
+                                    } else {
+                                        $condition[$pk] = null;
+                                    }
+                                }
                             }
                             /* @var $relObj ActiveRecord */
                             $relObj = $relModelClass::findOne($condition);
