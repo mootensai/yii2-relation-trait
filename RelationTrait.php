@@ -139,7 +139,7 @@ trait RelationTrait {
                         $isCompositePK = (count($relPKAttr) > 1);
                         foreach ($link as $key => $value) {
                             if(isset($this->$value)){
-                                $array[$key] = $key . ' = ' . $this->$value;
+                                $array[$key] = $key . " = '" . $this->$value . "'";
                             }
                         }
                         $error = !$this->{$data['name']}[0]->deleteAll(implode(' AND ', $array));
