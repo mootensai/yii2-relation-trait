@@ -9,6 +9,7 @@
 
 namespace mootensai\relation;
 
+use yii\db\ActiveQuery;
 use \yii\db\ActiveRecord;
 use \yii\db\Exception;
 use \yii\helpers\Inflector;
@@ -21,16 +22,36 @@ trait RelationTrait {
             $shortName = StringHelper::basename(get_class($this));
             foreach ($POST as $key => $value) {
                 if ($key != $shortName && strpos($key, '_') === false) {
+                    /* @var $rel ActiveQuery */
+                    /* @var $this ActiveRecord */
+                    /* @var $relObj ActiveRecord */
                     $isHasMany = is_array($value);
-                    $relName = ($isHasMany) ? lcfirst($key) . 's' : lcfirst($key);
+                    $relName = ($isHasMany) ? lcfirst(Inflector::pluralize($key)) : lcfirst($key);
                     $rel = $this->getRelation($relName);
                     $relModelClass = $rel->modelClass;
                     $relPKAttr = $relModelClass::primaryKey();
-                    if ($isHasMany) {
+                    $isManyMany = count($relPKAttr) > 1;
+                    if($isManyMany){
+                        foreach($value as $relPost){
+                            $condition = [];
+                            $condition[$this->primaryKey()[0]] = $this->primaryKey;
+                            foreach($relPost as $relAttr => $relAttrVal){
+                                if(in_array($relAttr, $relPKAttr))
+                                    $condition[$relAttr] = $relAttrVal;
+                            }
+                            $relObj = $relModelClass::findOne($condition);
+                            if(is_null($relObj)){
+                                $relObj = new $relModelClass;
+                            }
+                            $relObj->load($relPost, '');
+                            $container[] = $relObj;
+                        }
+                        $this->populateRelation($relName, $container);
+                    }else if ($isHasMany) {
                         $container = [];
                         foreach ($value as $relPost) {
                             /* @var $relObj ActiveRecord */
-                            $relObj = (empty($relPost[$relPKAttr[0]])) ? new $rel->modelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
+                            $relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
                             $relObj->load($relPost, '');
                             $container[] = $relObj;
                         }
@@ -55,59 +76,69 @@ trait RelationTrait {
         try {
             if ($this->save()) {
                 $error = 0;
-                foreach ($this->relatedRecords as $name => $records) {
-                    $AQ = $this->getRelation($name);
-                    $link = $AQ->link;
-                    $notDeletedPK = [];
-                    $relPKAttr = $records[0]->primaryKey();
-                    $isCompositePK = (count($relPKAttr) > 1);
-                    /* @var $relModel ActiveRecord */
-                    foreach ($records as $index => $relModel) {
-                        $notDeletedFK = [];
-                        foreach ($link as $key => $value) {
-                            $relModel->$key = $this->$value;
-                            $notDeletedFK[$key] = "$key = '{$this->$value}'";
-                        }
-                        $relSave = $relModel->save();
-                        if (!$relSave || !empty($relModel->errors)) {
-                            $relModelWords = Inflector::camel2words(StringHelper::basename($AQ->modelClass));
-                            $index++;
-                            foreach ($relModel->errors as $validation) {
-                                foreach ($validation as $errorMsg) {
-                                    $this->addError($name, "$relModelWords #$index : $errorMsg");
+                if(!empty($this->relatedRecords)){
+                    foreach ($this->relatedRecords as $name => $records) {
+                        $AQ = $this->getRelation($name);
+                        $link = $AQ->link;
+                        $notDeletedPK = [];
+                        $relPKAttr = $records[0]->primaryKey();
+                        $isCompositePK = (count($relPKAttr) > 1);
+                        /* @var $relModel ActiveRecord */
+                        foreach ($records as $index => $relModel) {
+                            $notDeletedFK = [];
+                            foreach ($link as $key => $value) {
+                                $relModel->$key = $this->$value;
+                                $notDeletedFK[$key] = "$key = '{$this->$value}'";
+                            }
+                            $relSave = $relModel->save();
+                            if (!$relSave || !empty($relModel->errors)) {
+                                $relModelWords = Inflector::camel2words(StringHelper::basename($AQ->modelClass));
+                                $index++;
+                                foreach ($relModel->errors as $validation) {
+                                    foreach ($validation as $errorMsg) {
+                                        $this->addError($name, "$relModelWords #$index : $errorMsg");
+                                    }
+                                }
+                                $error = 1;
+                            } else {
+                                //GET PK OF REL MODEL
+                                if ($isCompositePK) {
+                                    foreach ($relModel->primaryKey as $attr => $value) {
+                                        $notDeletedPK[$attr][] = "'$value'";
+                                    }
+                                } else {
+                                    $notDeletedPK[] = "'$relModel->primaryKey'";
                                 }
                             }
-                            $error = 1;
-                        } else {
-                            //GET PK OF REL MODEL
+                        }
+                        if (!$this->isNewRecord) {
+                            //DELETE WITH 'NOT IN' PK MODEL & REL MODEL
+                            $notDeletedFK = implode(' AND ', $notDeletedFK);
                             if ($isCompositePK) {
-                                foreach ($relModel->primaryKey as $attr => $value) {
-                                    $notDeletedPK[$attr][] = "'$value'";
+                                $compiledNotDeletedPK = [];
+                                foreach ($notDeletedPK as $attr => $pks) {
+                                    $compiledNotDeletedPK[$attr] = "$attr NOT IN(" . implode(', ', $pks) . ")";
+                                    if (!empty($compiledNotDeletedPK[$attr])) {
+                                        $relModel->deleteAll("$notDeletedFK AND " . implode(' AND ', $compiledNotDeletedPK));
+                                    }
                                 }
                             } else {
-                                $notDeletedPK[] = "'$relModel->primaryKey'";
-                            }
-                        }
-                    }
-                    if (!$this->isNewRecord) {
-                        //DELETE WITH 'NOT IN' PK MODEL & REL MODEL
-                        $notDeletedFK = implode(' AND ', $notDeletedFK);
-                        if ($isCompositePK) {
-                            $compiledNotDeletedPK = [];
-                            foreach ($notDeletedPK as $attr => $pks) {
-                                $compiledNotDeletedPK[$attr] = "$attr NOT IN(" . implode(', ', $pks) . ")";
-                                if (!empty($compiledNotDeletedPK[$attr])) {
-                                    $relModel->deleteAll("$notDeletedFK AND " . implode(' AND ', $compiledNotDeletedPK));
+                                $compiledNotDeletedPK = implode(',', $notDeletedPK);
+                                if (!empty($compiledNotDeletedPK)) {
+                                    $relModel->deleteAll($notDeletedFK . ' AND ' . $relPKAttr[0] . " NOT IN ($compiledNotDeletedPK)");
                                 }
                             }
-                        } else {
-                            $compiledNotDeletedPK = implode(',', $notDeletedPK);
-                            if (!empty($compiledNotDeletedPK)) {
-                                $relModel->deleteAll($notDeletedFK . ' AND ' . $relPKAttr[0] . " NOT IN ($compiledNotDeletedPK)");
-                            }
                         }
                     }
+                }else{
+                    // NO CHILDREN!!
+                    if (!$this->isNewRecord) {
+                        print_r($this->getRelationData());
+//                        $a = "getFilmActors";
+//                        print_r($this->$a());
+                    }
                 }
+
                 if ($error) {
                     $trans->rollback();
                     return false;
@@ -132,14 +163,13 @@ trait RelationTrait {
             $relData = $this->getRelationData();
             foreach ($relData as $data) {
                 if($data['ismultiple']){
-                    $AQ = $this->getRelation($data['name']);
-                    $link = $AQ->link;
+                    $link = $data['link'];
                     if(count($this->{$data['name']})){
                         $relPKAttr = $this->{$data['name']}[0]->primaryKey();
                         $isCompositePK = (count($relPKAttr) > 1);
                         foreach ($link as $key => $value) {
                             if(isset($this->$value)){
-                                $array[$key] = $key . " = '" . $this->$value . "'";
+                                $array[$key] = $key . ' = ' . $this->$value;
                             }
                         }
                         $error = !$this->{$data['name']}[0]->deleteAll(implode(' AND ', $array));
@@ -160,6 +190,8 @@ trait RelationTrait {
             throw $exc;
         }
     }
+
+
 
     public function getRelationData() {
         $ARMethods = get_class_methods('\yii\db\ActiveRecord');
@@ -186,6 +218,8 @@ trait RelationTrait {
                     $stack[$i]['name'] = lcfirst(str_replace('get', '', $method->name));
                     $stack[$i]['method'] = $method->name;
                     $stack[$i]['ismultiple'] = $rel->multiple;
+                    $stack[$i]['modelClass'] = $rel->modelClass;
+                    $stack[$i]['link'] = $rel->link;
                     $i++;
                 }
             } catch (\yii\base\ErrorException $exc) {}
