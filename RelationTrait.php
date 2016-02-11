@@ -33,33 +33,37 @@ trait RelationTrait {
                     $isManyMany = count($relPKAttr) > 1;
                     if($isManyMany){
                         foreach($value as $relPost){
-                            $condition = [];
-                            $condition[$this->primaryKey()[0]] = $this->primaryKey;
-                            foreach($relPost as $relAttr => $relAttrVal){
-                                if(in_array($relAttr, $relPKAttr))
-                                    $condition[$relAttr] = $relAttrVal;
+                            if(!empty(array_filter($relPost))){
+                                $condition = [];
+                                $condition[$this->primaryKey()[0]] = $this->primaryKey;
+                                foreach($relPost as $relAttr => $relAttrVal){
+                                    if(in_array($relAttr, $relPKAttr))
+                                        $condition[$relAttr] = $relAttrVal;
+                                }
+                                $relObj = $relModelClass::findOne($condition);
+                                if(is_null($relObj)){
+                                    $relObj = new $relModelClass;
+                                }
+                                $relObj->load($relPost, '');
+                                $container[] = $relObj;
                             }
-                            $relObj = $relModelClass::findOne($condition);
-                            if(is_null($relObj)){
-                                $relObj = new $relModelClass;
-                            }
-                            $relObj->load($relPost, '');
-                            $container[] = $relObj;
                         }
                         $this->populateRelation($relName, $container);
                     }else if ($isHasMany) {
                         $container = [];
                         foreach ($value as $relPost) {
-                            /* @var $relObj ActiveRecord */
-                            $relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
-                            $relObj->load($relPost, '');
-                            $container[] = $relObj;
+                            if(!empty(array_filter($relPost))) {
+                                /* @var $relObj ActiveRecord */
+                                $relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
+                                $relObj->load($relPost, '');
+                                $container[] = $relObj;
+                            }
                         }
                         $this->populateRelation($relName, $container);
                     } else {
-                        $relObj = new $rel->modelClass;
+                        $relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
                         $relObj->load($value);
-                        $this->populateRelation($relName, $value);
+                        $this->populateRelation($relName, $relObj);
                     }
                 }
             }
@@ -78,64 +82,74 @@ trait RelationTrait {
                 $error = 0;
                 if(!empty($this->relatedRecords)){
                     foreach ($this->relatedRecords as $name => $records) {
-                        $AQ = $this->getRelation($name);
-                        $link = $AQ->link;
-                        $notDeletedPK = [];
-                        $relPKAttr = $records[0]->primaryKey();
-                        $isCompositePK = (count($relPKAttr) > 1);
-                        /* @var $relModel ActiveRecord */
-                        foreach ($records as $index => $relModel) {
-                            $notDeletedFK = [];
-                            foreach ($link as $key => $value) {
-                                $relModel->$key = $this->$value;
-                                $notDeletedFK[$key] = "$key = '{$this->$value}'";
-                            }
-                            $relSave = $relModel->save();
-                            if (!$relSave || !empty($relModel->errors)) {
-                                $relModelWords = Inflector::camel2words(StringHelper::basename($AQ->modelClass));
-                                $index++;
-                                foreach ($relModel->errors as $validation) {
-                                    foreach ($validation as $errorMsg) {
-                                        $this->addError($name, "$relModelWords #$index : $errorMsg");
+                        if(!empty($records)){
+                            $AQ = $this->getRelation($name);
+                            $link = $AQ->link;
+                            $notDeletedPK = [];
+                            $relPKAttr = $records[0]->primaryKey();
+                            $isCompositePK = (count($relPKAttr) > 1);
+                            /* @var $relModel ActiveRecord */
+                            foreach ($records as $index => $relModel) {
+                                $notDeletedFK = [];
+                                foreach ($link as $key => $value) {
+                                    $relModel->$key = $this->$value;
+                                    $notDeletedFK[$key] = "$key = '{$this->$value}'";
+                                }
+                                $relSave = $relModel->save();
+                                if (!$relSave || !empty($relModel->errors)) {
+                                    $relModelWords = Inflector::camel2words(StringHelper::basename($AQ->modelClass));
+                                    $index++;
+                                    foreach ($relModel->errors as $validation) {
+                                        foreach ($validation as $errorMsg) {
+                                            $this->addError($name, "$relModelWords #$index : $errorMsg");
+                                        }
+                                    }
+                                    $error = 1;
+                                } else {
+                                    //GET PK OF REL MODEL
+                                    if ($isCompositePK) {
+                                        foreach ($relModel->primaryKey as $attr => $value) {
+                                            $notDeletedPK[$attr][] = "'$value'";
+                                        }
+                                    } else {
+                                        $notDeletedPK[] = "'$relModel->primaryKey'";
                                     }
                                 }
-                                $error = 1;
-                            } else {
-                                //GET PK OF REL MODEL
+                            }
+                            if (!$this->isNewRecord) {
+                                //DELETE WITH 'NOT IN' PK MODEL & REL MODEL
+                                $notDeletedFK = implode(' AND ', $notDeletedFK);
                                 if ($isCompositePK) {
-                                    foreach ($relModel->primaryKey as $attr => $value) {
-                                        $notDeletedPK[$attr][] = "'$value'";
+                                    echo "composite pk\n";
+                                    $compiledNotDeletedPK = [];
+                                    foreach ($notDeletedPK as $attr => $pks) {
+                                        $compiledNotDeletedPK[$attr] = "$attr NOT IN(" . implode(', ', $pks) . ")";
+                                        if (!empty($compiledNotDeletedPK[$attr])) {
+                                            $relModel->deleteAll("$notDeletedFK AND " . implode(' AND ', $compiledNotDeletedPK));
+                                        }
+                                        print_r("$notDeletedFK AND " . implode(' AND ', $compiledNotDeletedPK)."\n");
                                     }
                                 } else {
-                                    $notDeletedPK[] = "'$relModel->primaryKey'";
-                                }
-                            }
-                        }
-                        if (!$this->isNewRecord) {
-                            //DELETE WITH 'NOT IN' PK MODEL & REL MODEL
-                            $notDeletedFK = implode(' AND ', $notDeletedFK);
-                            if ($isCompositePK) {
-                                $compiledNotDeletedPK = [];
-                                foreach ($notDeletedPK as $attr => $pks) {
-                                    $compiledNotDeletedPK[$attr] = "$attr NOT IN(" . implode(', ', $pks) . ")";
-                                    if (!empty($compiledNotDeletedPK[$attr])) {
-                                        $relModel->deleteAll("$notDeletedFK AND " . implode(' AND ', $compiledNotDeletedPK));
+                                    $compiledNotDeletedPK = implode(',', $notDeletedPK);
+                                    if (!empty($compiledNotDeletedPK)) {
+                                        $relModel->deleteAll($notDeletedFK . ' AND ' . $relPKAttr[0] . " NOT IN ($compiledNotDeletedPK)");
                                     }
-                                }
-                            } else {
-                                $compiledNotDeletedPK = implode(',', $notDeletedPK);
-                                if (!empty($compiledNotDeletedPK)) {
-                                    $relModel->deleteAll($notDeletedFK . ' AND ' . $relPKAttr[0] . " NOT IN ($compiledNotDeletedPK)");
                                 }
                             }
                         }
                     }
                 }else{
-                    // NO CHILDREN!!
                     if (!$this->isNewRecord) {
-                        print_r($this->getRelationData());
-//                        $a = "getFilmActors";
-//                        print_r($this->$a());
+                        $relData = $this->getRelationData();
+                        foreach($relData as $rel){
+                            /* @var $relModel ActiveRecord */
+                            $relModel = new $rel['modelClass'];
+                            $condition = [];
+                            foreach($rel['link'] as $k => $v){
+                                $condition[] = $k . " = ". $this->$v;
+                            }
+                            $relModel->deleteAll(implode(" AND ",$condition));
+                        }
                     }
                 }
 
