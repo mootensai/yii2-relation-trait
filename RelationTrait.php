@@ -136,15 +136,15 @@ trait RelationTrait
 //                                        print_r($notDeletedFK);
 //                                        echo "\nfields : \n";
 //                                        print_r($fields) . "\n";
-                                        $contoh = ['and',['actor_id' => 1],['not in', new \yii\db\Expression('(actor_id, film_id)'),
-                                            [
-                                                new \yii\db\Expression('(1,1)'),
-                                                new \yii\db\Expression('(1,23)'),
-                                                new \yii\db\Expression('(1,25)'),
-                                                new \yii\db\Expression('(1,980)'),
-                                                new \yii\db\Expression('(1,970)'),
-                                                new \yii\db\Expression('(1,939)')
-                                            ]]];
+//                                        $contoh = ['and',['actor_id' => 1],['not in', new \yii\db\Expression('(actor_id, film_id)'),
+//                                        [
+//                                            new \yii\db\Expression('(1,1)'),
+//                                            new \yii\db\Expression('(1,23)'),
+//                                            new \yii\db\Expression('(1,25)'),
+//                                            new \yii\db\Expression('(1,980)'),
+//                                            new \yii\db\Expression('(1,970)'),
+//                                            new \yii\db\Expression('(1,939)')
+//                                        ]]];
 //                                        echo $relModel::find()->where(['and',['actor_id' => 1],['not in', new \yii\db\Expression('(actor_id, film_id)'),
 //                                            [
 //                                                new \yii\db\Expression('(1,1)'),
@@ -167,6 +167,18 @@ trait RelationTrait
                                         }
                                         array_push($notIn,$content);
                                         array_push($compiledNotDeletedPK,$notIn);
+//                                        $a = $relModel->findAll($compiledNotDeletedPK);
+//                                        echo "Compiled Not Deleted PK :\n ";
+//                                        print_r($compiledNotDeletedPK). "\n";
+//                                        print_r($a);
+//                                        foreach($a as $ac){
+//                                            print_r($ac->attributes);
+//                                        }
+//                                        print_r($compiledNotDeletedPK) . "\n";
+//                                        echo "Contoh :\n ";
+//                                        print_r($contoh);
+//                                        echo $relModel->find()->where($compiledNotDeletedPK)->createCommand()->rawSql;
+                                        $relModel->deleteAll($compiledNotDeletedPK);
                                         try{
                                             $relModel->deleteAll($compiledNotDeletedPK);
                                         } catch (\yii\db\IntegrityException $exc) {
@@ -193,21 +205,36 @@ trait RelationTrait
                     }
                 } else {
                     //No Children left
+                    echo "No Children left";
                     if (!$this->isNewRecord) {
                         $relData = $this->getRelationData();
                         foreach ($relData as $rel) {
                             /* @var $relModel ActiveRecord */
-                            $relModel = new $rel['modelClass'];
-                            $condition = [];
-                            foreach ($rel['link'] as $k => $v) {
-                                if(property_exists($this, $v))
-                                    $condition[] = $k . " = " . $this->$v;
-                            }
-                            try {
-                                $relModel->deleteAll(implode(" AND ", $condition));
-                            } catch (\yii\db\IntegrityException $exc) {
-                                $this->addError($rel['name'], "Data can't be deleted because it's still used by another data.");
-                                $error = 1;
+                            if(empty($rel['via'])){
+                                $relModel = new $rel['modelClass'];
+                                $condition = [];
+                                $isManyMany = count($relModel->primaryKey()) > 1;
+                                if($isManyMany){
+                                    foreach ($rel['link'] as $k => $v) {
+                                        $condition[] = $k . " = " . $this->$v;
+                                    }
+                                    try {
+                                        $relModel->deleteAll(implode(" AND ", $condition));
+                                    } catch (\yii\db\IntegrityException $exc) {
+                                        $this->addError($rel['name'], "Data can't be deleted because it's still used by another data.");
+                                        $error = 1;
+                                    }
+                                }else{
+                                    foreach ($rel['link'] as $k => $v) {
+                                        $condition[] = $k . " = " . $this->$v;
+                                    }
+                                    try {
+                                        $relModel->deleteAll(implode(" AND ", $condition));
+                                    } catch (\yii\db\IntegrityException $exc) {
+                                        $this->addError($rel['name'], "Data can't be deleted because it's still used by another data.");
+                                        $error = 1;
+                                    }
+                                }
                             }
                         }
                     }
@@ -311,6 +338,7 @@ trait RelationTrait
                     $stack[$i]['ismultiple'] = $rel->multiple;
                     $stack[$i]['modelClass'] = $rel->modelClass;
                     $stack[$i]['link'] = $rel->link;
+                    $stack[$i]['via'] = $rel->via;
                     $i++;
                 }
             } catch (\yii\base\ErrorException $exc) {
