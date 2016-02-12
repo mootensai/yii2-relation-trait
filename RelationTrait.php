@@ -34,6 +34,7 @@ trait RelationTrait
                     $relPKAttr = $relModelClass::primaryKey();
                     $isManyMany = count($relPKAttr) > 1;
                     if ($isManyMany) {
+                        $container = [];
                         foreach ($value as $relPost) {
                             if (!empty(array_filter($relPost))) {
                                 $condition = [];
