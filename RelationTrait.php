@@ -99,8 +99,8 @@ trait RelationTrait
                                     $notDeletedFK = [];
                                     foreach ($link as $key => $value) {
                                         $relModel->$key = $this->$value;
-                                        if($isManyMany) $notDeletedFK[$key] = $this->$value;
-                                        elseif($isHasMany) $notDeletedFK[$key] = "$key = '{$this->$value}'";
+                                        if ($isManyMany) $notDeletedFK[$key] = $this->$value;
+                                        elseif ($isHasMany) $notDeletedFK[$key] = "$key = '{$this->$value}'";
                                     }
                                     $relSave = $relModel->save();
 
@@ -155,18 +155,18 @@ trait RelationTrait
 //                                                new \yii\db\Expression('(1,939)')
 //                                            ]]])->createCommand()->rawSql;
                                         $compiledFields = implode(", ", array_keys($fields));
-                                        $compiledNotDeletedPK = ['and',$notDeletedFK];
+                                        $compiledNotDeletedPK = ['and', $notDeletedFK];
                                         $notIn = ['not in', new \yii\db\Expression("($compiledFields)")];
-                                        foreach($notDeletedPK as $value){
+                                        foreach ($notDeletedPK as $value) {
                                             $v = [];
-                                            foreach($fields as $key => $f){
+                                            foreach ($fields as $key => $f) {
                                                 $v[] = $value[$key];
                                             }
-                                            $c = implode(',',$v);
+                                            $c = implode(',', $v);
                                             $content[] = new \yii\db\Expression("($c)");
                                         }
-                                        array_push($notIn,$content);
-                                        array_push($compiledNotDeletedPK,$notIn);
+                                        array_push($notIn, $content);
+                                        array_push($compiledNotDeletedPK, $notIn);
 //                                        $a = $relModel->findAll($compiledNotDeletedPK);
 //                                        echo "Compiled Not Deleted PK :\n ";
 //                                        print_r($compiledNotDeletedPK). "\n";
@@ -179,7 +179,7 @@ trait RelationTrait
 //                                        print_r($contoh);
 //                                        echo $relModel->find()->where($compiledNotDeletedPK)->createCommand()->rawSql;
                                         $relModel->deleteAll($compiledNotDeletedPK);
-                                        try{
+                                        try {
                                             $relModel->deleteAll($compiledNotDeletedPK);
                                         } catch (\yii\db\IntegrityException $exc) {
                                             $this->addError($name, "Data can't be deleted because it's still used by another data.");
@@ -210,11 +210,11 @@ trait RelationTrait
                         $relData = $this->getRelationData();
                         foreach ($relData as $rel) {
                             /* @var $relModel ActiveRecord */
-                            if(empty($rel['via'])){
+                            if (empty($rel['via'])) {
                                 $relModel = new $rel['modelClass'];
                                 $condition = [];
                                 $isManyMany = count($relModel->primaryKey()) > 1;
-                                if($isManyMany){
+                                if ($isManyMany) {
                                     foreach ($rel['link'] as $k => $v) {
                                         $condition[] = $k . " = " . $this->$v;
                                     }
@@ -224,7 +224,7 @@ trait RelationTrait
                                         $this->addError($rel['name'], "Data can't be deleted because it's still used by another data.");
                                         $error = 1;
                                     }
-                                }else{
+                                } else {
                                     foreach ($rel['link'] as $k => $v) {
                                         $condition[] = $k . " = " . $this->$v;
                                     }
