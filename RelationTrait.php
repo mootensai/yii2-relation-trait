@@ -312,7 +312,7 @@ trait RelationTrait
     }
 
     /* this function is deprecated */
-e
+
     public function getAttributesWithRelatedAsPost()
     {
         $return = [];
