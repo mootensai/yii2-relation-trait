@@ -170,7 +170,7 @@ trait RelationTrait
                     }
                 } else {
                     //No Children left
-                    echo "No Children left";
+                    //echo "No Children left";
                     if (!$this->isNewRecord) {
                         $relData = $this->getRelationData();
                         foreach ($relData as $rel) {
