@@ -36,7 +36,7 @@ trait RelationTrait
                     if ($isManyMany) {
                         $container = [];
                         foreach ($value as $relPost) {
-                            if (!empty(array_filter($relPost))) {
+                            if (array_filter($relPost)) {
                                 $condition = [];
                                 $condition[$this->primaryKey()[0]] = $this->primaryKey;
                                 foreach ($relPost as $relAttr => $relAttrVal) {
@@ -170,6 +170,7 @@ trait RelationTrait
                     }
                 } else {
                     //No Children left
+                    //echo "No Children left";
                     if (!$this->isNewRecord) {
                         $relData = $this->getRelationData();
                         foreach ($relData as $rel) {
