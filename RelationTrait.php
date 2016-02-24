@@ -55,7 +55,7 @@ trait RelationTrait
                     } else if ($isHasMany) {
                         $container = [];
                         foreach ($value as $relPost) {
-                            if (!empty(array_filter($relPost))) {
+                            if (array_filter($relPost)) {
                                 /* @var $relObj ActiveRecord */
                                 $relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
                                 $relObj->load($relPost, '');
@@ -311,6 +311,7 @@ trait RelationTrait
                     $i++;
                 }
             } catch (\yii\base\ErrorException $exc) {
+                //if method name can't be call, 
             }
         }
         return $stack;
