@@ -84,7 +84,7 @@ trait RelationTrait
         $isNewRecord = $this->isNewRecord;
         try {
             if ($this->save()) {
-                $error = 0;
+                $error = false;
                 if (!empty($this->relatedRecords)) {
                     foreach ($this->relatedRecords as $name => $records) {
                         if (!empty($records)) {
@@ -114,7 +114,7 @@ trait RelationTrait
                                                 $this->addError($name, "$relModelWords #$index : $errorMsg");
                                             }
                                         }
-                                        $error = 1;
+                                        $error = true;
                                     } else {
                                         //GET PK OF REL MODEL
                                         if ($isManyMany) {
@@ -149,6 +149,7 @@ trait RelationTrait
                                             $relModel->deleteAll($compiledNotDeletedPK);
                                         } catch (\yii\db\IntegrityException $exc) {
                                             $this->addError($name, "Data can't be deleted because it's still used by another data.");
+                                            $error = true;
                                         }
                                     } else {
                                         $notDeletedFK = implode(' AND ', $notDeletedFK);
@@ -159,6 +160,7 @@ trait RelationTrait
 
                                             } catch (\yii\db\IntegrityException $exc) {
                                                 $this->addError($name, "Data can't be deleted because it's still used by another data.");
+                                                $error = 1;
                                             }
                                         }
                                     }
@@ -207,6 +209,7 @@ trait RelationTrait
 
                 if ($error) {
                     $trans->rollback();
+                    $this->isNewRecord = $isNewRecord;
                     return false;
                 }
                 $trans->commit();
@@ -216,6 +219,7 @@ trait RelationTrait
             }
         } catch (Exception $exc) {
             $trans->rollBack();
+            $this->isNewRecord = $isNewRecord;
             throw $exc;
         }
     }
