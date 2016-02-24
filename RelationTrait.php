@@ -81,6 +81,7 @@ trait RelationTrait
         /* @var $this ActiveRecord */
         $db = $this->getDb();
         $trans = $db->beginTransaction();
+        $isNewRecord = $this->isNewRecord;
         try {
             if ($this->save()) {
                 $error = 0;
@@ -127,7 +128,7 @@ trait RelationTrait
                                     }
                                     $i++;
                                 }
-                                if (!$this->isNewRecord) {
+                                if (!$isNewRecord) {
                                     //DELETE WITH 'NOT IN' PK MODEL & REL MODEL
                                     if ($isManyMany) {
                                         $compiledFields = implode(", ", array_keys($fields));
@@ -170,8 +171,7 @@ trait RelationTrait
                     }
                 } else {
                     //No Children left
-                    //echo "No Children left";
-                    if (!$this->isNewRecord) {
+                    if (!$isNewRecord) {
                         $relData = $this->getRelationData();
                         foreach ($relData as $rel) {
                             /* @var $relModel ActiveRecord */
