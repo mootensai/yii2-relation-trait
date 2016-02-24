@@ -160,7 +160,7 @@ trait RelationTrait
 
                                             } catch (\yii\db\IntegrityException $exc) {
                                                 $this->addError($name, "Data can't be deleted because it's still used by another data.");
-                                                $error = 1;
+                                                $error = true;
                                             }
                                         }
                                     }
@@ -189,7 +189,7 @@ trait RelationTrait
                                         $relModel->deleteAll(implode(" AND ", $condition));
                                     } catch (\yii\db\IntegrityException $exc) {
                                         $this->addError($rel['name'], "Data can't be deleted because it's still used by another data.");
-                                        $error = 1;
+                                        $error = true;
                                     }
                                 }else{
                                     foreach ($rel['link'] as $k => $v) {
@@ -199,7 +199,7 @@ trait RelationTrait
                                         $relModel->deleteAll(implode(" AND ", $condition));
                                     } catch (\yii\db\IntegrityException $exc) {
                                         $this->addError($rel['name'], "Data can't be deleted because it's still used by another data.");
-                                        $error = 1;
+                                        $error = true;
                                     }
                                 }
                             }
@@ -230,7 +230,7 @@ trait RelationTrait
         $db = $this->getDb();
         $trans = $db->beginTransaction();
         try {
-            $error = 0;
+            $error = false;
             $relData = $this->getRelationData();
             foreach ($relData as $data) {
                 if ($data['ismultiple']) {
