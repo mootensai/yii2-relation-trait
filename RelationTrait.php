@@ -192,14 +192,16 @@ trait RelationTrait
                                         $error = true;
                                     }
                                 }else{
-                                    foreach ($rel['link'] as $k => $v) {
-                                        $condition[] = $k . " = " . $this->$v;
-                                    }
-                                    try {
-                                        $relModel->deleteAll(implode(" AND ", $condition));
-                                    } catch (\yii\db\IntegrityException $exc) {
-                                        $this->addError($rel['name'], "Data can't be deleted because it's still used by another data.");
-                                        $error = true;
+                                    if($rel['ismultiple']){
+                                        foreach ($rel['link'] as $k => $v) {
+                                            $condition[] = $k . " = " . $this->$v;
+                                        }
+                                        try {
+                                            $relModel->deleteAll(implode(" AND ", $condition));
+                                        } catch (\yii\db\IntegrityException $exc) {
+                                            $this->addError($rel['name'], "Data can't be deleted because it's still used by another data.");
+                                            $error = true;
+                                        }
                                     }
                                 }
                             }
