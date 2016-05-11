@@ -18,7 +18,7 @@ use \yii\helpers\StringHelper;
 trait RelationTrait
 {
 
-    public function loadAll($POST)
+    public function loadAll($POST, $skippedRelations = [])
     {
         if ($this->load($POST)) {
             $shortName = StringHelper::basename(get_class($this));
@@ -33,6 +33,10 @@ trait RelationTrait
                     $relModelClass = $rel->modelClass;
                     $relPKAttr = $relModelClass::primaryKey();
                     $isManyMany = count($relPKAttr) > 1;
+
+                    if(in_array($relName, $skippedRelations))
+                        continue;
+
                     if ($isManyMany) {
                         $container = [];
                         foreach ($value as $relPost) {
@@ -76,7 +80,7 @@ trait RelationTrait
         }
     }
 
-    public function saveAll()
+    public function saveAll($skippedRelations = [])
     {
         /* @var $this ActiveRecord */
         $db = $this->getDb();
@@ -87,6 +91,10 @@ trait RelationTrait
                 $error = false;
                 if (!empty($this->relatedRecords)) {
                     foreach ($this->relatedRecords as $name => $records) {
+
+                        if(in_array($name,$skippedRelations))
+                            continue;
+
                         if (!empty($records)) {
                             $isHasMany = is_array($records);
                             $AQ = $this->getRelation($name);
@@ -94,6 +102,7 @@ trait RelationTrait
                             $notDeletedPK = [];
                             $relPKAttr = $records[0]->primaryKey();
                             $isManyMany = (count($relPKAttr) > 1);
+
                             if ($isHasMany) {
                                 /* @var $relModel ActiveRecord */
                                 $i = 0;
@@ -176,6 +185,9 @@ trait RelationTrait
                     if (!$isNewRecord) {
                         $relData = $this->getRelationData();
                         foreach ($relData as $rel) {
+                            if(in_array($rel['name'], $skippedRelations))
+                                continue;
+
                             /* @var $relModel ActiveRecord */
                             if(empty($rel['via'])){
                                 $relModel = new $rel['modelClass'];
