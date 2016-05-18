@@ -195,7 +195,7 @@ trait RelationTrait
                                 $isManyMany = count($relModel->primaryKey()) > 1;
                                 if($isManyMany){
                                     foreach ($rel['link'] as $k => $v) {
-                                        $condition[] = $k . " = " . $this->$v;
+                                        $condition[] = "$k = '{$this->$v}'";
                                     }
                                     try {
                                         $relModel->deleteAll(implode(" AND ", $condition));
@@ -206,7 +206,7 @@ trait RelationTrait
                                 }else{
                                     if($rel['ismultiple']){
                                         foreach ($rel['link'] as $k => $v) {
-                                            $condition[] = $k . " = " . $this->$v;
+                                            $condition[] = "$k = '{$this->$v}'";
                                         }
                                         try {
                                             $relModel->deleteAll(implode(" AND ", $condition));
