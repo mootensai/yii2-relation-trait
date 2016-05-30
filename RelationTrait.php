@@ -68,8 +68,8 @@ trait RelationTrait
                         }
                         $this->populateRelation($relName, $container);
                     } else {
-                        $relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
-                        $relObj->load($value);
+                        $relObj = (empty($value[$relPKAttr[0]])) ? new $relModelClass : $relModelClass::findOne($value[$relPKAttr[0]]);
+                        $relObj->load($_POST, $key);
                         $this->populateRelation($relName, $relObj);
                     }
                 }
