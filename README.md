@@ -4,7 +4,10 @@ Yii 2 Models add functionality for load with relation (loadAll($POST)), &amp; tr
 [![Latest Stable Version](https://poser.pugx.org/mootensai/yii2-relation-trait/v/stable)](https://packagist.org/packages/mootensai/yii2-relation-trait)
 [![License](https://poser.pugx.org/mootensai/yii2-relation-trait/license)](https://packagist.org/packages/mootensai/yii2-relation-trait)
 [![Total Downloads](https://img.shields.io/packagist/dt/mootensai/yii2-relation-trait.svg?style=flat-square)](https://packagist.org/packages/mootensai/yii2-relation-trait)
+[![Monthly Downloads](https://poser.pugx.org/mootensai/yii2-relation-trait/d/monthly)](https://packagist.org/packages/mootensai/yii2-relation-trait)
+[![Daily Downloads](https://poser.pugx.org/mootensai/yii2-relation-trait/d/daily)](https://packagist.org/packages/mootensai/yii2-relation-trait)
 [![Join the chat at https://gitter.im/mootensai/yii2-relation-trait](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mootensai/yii2-relation-trait?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mootensai/yii2-relation-trait/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
 ## Installation
 
@@ -119,5 +122,5 @@ Test it on another DB. I only test it on MySQL.
 I'm open for any improvement
 
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mootensai/yii2-relation-trait/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
 
