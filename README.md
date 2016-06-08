@@ -117,3 +117,7 @@ https://github.com/mootensai/yii2-uuid-behavior
 Test it on another DB. I only test it on MySQL.
 
 I'm open for any improvement
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mootensai/yii2-relation-trait/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
