@@ -27,7 +27,7 @@ trait RelationTrait
                     /* @var $rel ActiveQuery */
                     /* @var $this ActiveRecord */
                     /* @var $relObj ActiveRecord */
-                    $isHasMany = is_array($value);
+                    $isHasMany = is_array($value) && is_array(current($value));
                     $relName = ($isHasMany) ? lcfirst(Inflector::pluralize($key)) : lcfirst($key);
                     $rel = $this->getRelation($relName);
                     $relModelClass = $rel->modelClass;
@@ -69,7 +69,7 @@ trait RelationTrait
                         $this->populateRelation($relName, $container);
                     } else {
                         $relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
-                        $relObj->load($value);
+                        $relObj->load($value, '');
                         $this->populateRelation($relName, $relObj);
                     }
                 }
@@ -100,7 +100,7 @@ trait RelationTrait
                             $AQ = $this->getRelation($name);
                             $link = $AQ->link;
                             $notDeletedPK = [];
-                            $relPKAttr = $records[0]->primaryKey();
+                            $relPKAttr = is_array($records) ? $records[0]->primaryKey() : $records->primaryKey();
                             $isManyMany = (count($relPKAttr) > 1);
 
                             if ($isHasMany) {
@@ -325,7 +325,7 @@ trait RelationTrait
                     $i++;
                 }
             } catch (\yii\base\ErrorException $exc) {
-                //if method name can't be call, 
+                //if method name can't be call,
             }
         }
         return $stack;
