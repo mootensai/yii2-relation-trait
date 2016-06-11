@@ -23,13 +23,13 @@ trait RelationTrait
             $shortName = StringHelper::basename(get_class($this));
             foreach ($POST as $key => $value) {
                 if ($key != $shortName && strpos($key, '_') === false) {
-                    /* @var $rel ActiveQuery */
+                    /* @var $AQ ActiveQuery */
                     /* @var $this ActiveRecord */
                     /* @var $relObj ActiveRecord */
                     $isHasMany = is_array($value) && is_array(current($value));
                     $relName = ($isHasMany) ? lcfirst(Inflector::pluralize($key)) : lcfirst($key);
-                    $rel = $this->getRelation($relName);
-                    $relModelClass = $rel->modelClass;
+                    $AQ = $this->getRelation($relName);
+                    $relModelClass = $AQ->modelClass;
                     $relPKAttr = $relModelClass::primaryKey();
                     $isManyMany = count($relPKAttr) > 1;
 
@@ -41,7 +41,7 @@ trait RelationTrait
                         foreach ($value as $relPost) {
                             if (array_filter($relPost)) {
                                 $condition = [];
-                                $condition[$this->primaryKey()[0]] = $this->primaryKey;
+                                $condition[$relPKAttr[0]] = $this->primaryKey;
                                 foreach ($relPost as $relAttr => $relAttrVal) {
                                     if (in_array($relAttr, $relPKAttr))
                                         $condition[$relAttr] = $relAttrVal;
@@ -349,7 +349,8 @@ trait RelationTrait
         $shortName = StringHelper::basename(get_class($this));
         $return[$shortName] = $this->attributes;
         foreach ($this->relatedRecords as $name => $records) {
-            if(is_array($records) && is_array(current($records))){
+            $AQ = $this->getRelation($name);
+            if($AQ->multiple){
                 foreach ($records as $index => $record) {
                     $return[$name][$index] = $record->attributes;
                 }
@@ -365,7 +366,8 @@ trait RelationTrait
     {
         $return = $this->attributes;
         foreach ($this->relatedRecords as $name => $records) {
-            if(is_array($records) && is_array(current($records))){
+            $AQ = $this->getRelation($name);
+            if($AQ->multiple){
                 foreach ($records as $index => $record) {
                     $return[$name][$index] = $record->attributes;
                 }
