@@ -21,6 +21,7 @@ trait RelationTrait
     {
         if ($this->load($POST)) {
             $shortName = StringHelper::basename(get_class($this));
+            $relData = $this->getRelationData();
             foreach ($POST as $key => $value) {
                 if ($key != $shortName && strpos($key, '_') === false) {
                     /* @var $AQ ActiveQuery */
@@ -33,7 +34,7 @@ trait RelationTrait
                     $relPKAttr = $relModelClass::primaryKey();
                     $isManyMany = count($relPKAttr) > 1;
 
-                    if (in_array($relName, $skippedRelations))
+                    if (in_array($relName, $skippedRelations) || !array_key_exists($relName,$relData))
                         continue;
 
                     if ($isManyMany) {
