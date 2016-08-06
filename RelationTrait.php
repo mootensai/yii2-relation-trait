@@ -157,7 +157,7 @@ trait RelationTrait
                                         try {
                                             $relModel->deleteAll($compiledNotDeletedPK);
                                         } catch (\yii\db\IntegrityException $exc) {
-                                            $this->addError($name, \Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
+                                            $this->addError($name, "Data can't be deleted because it's still used by another data.");
                                             $error = true;
                                         }
                                     } else {
@@ -167,7 +167,7 @@ trait RelationTrait
                                             try {
                                                 $relModel->deleteAll($notDeletedFK . ' AND ' . $relPKAttr[0] . " NOT IN ($compiledNotDeletedPK)");
                                             } catch (\yii\db\IntegrityException $exc) {
-                                                $this->addError($name, \Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
+                                                $this->addError($name, "Data can't be deleted because it's still used by another data.");
                                                 $error = true;
                                             }
                                         }
