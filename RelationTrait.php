@@ -97,6 +97,9 @@ trait RelationTrait
                         if (in_array($name, $skippedRelations))
                             continue;
 
+                        unset($fields);
+                        $fields = array();
+                        
                         if (!empty($records)) {
                             $AQ = $this->getRelation($name);
                             $link = $AQ->link;
