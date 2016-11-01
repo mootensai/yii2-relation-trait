@@ -153,7 +153,6 @@ trait RelationTrait
                                         }
                                         array_push($notIn, $content);
                                         array_push($compiledNotDeletedPK, $notIn);
-                                        $relModel->deleteAll($compiledNotDeletedPK);
                                         try {
                                             $relModel->deleteAll($compiledNotDeletedPK);
                                         } catch (\yii\db\IntegrityException $exc) {
