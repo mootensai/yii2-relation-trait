@@ -113,8 +113,8 @@ trait RelationTrait
                                     $notDeletedFK = [];
                                     foreach ($link as $key => $value) {
                                         $relModel->$key = $value;
-                                        if ($isManyMany) $notDeletedFK[$key] = "'{$value}'";
-                                        elseif ($AQ->multiple) $notDeletedFK[$key] = "$key = '{$value}'";
+                                        if ($isManyMany) $notDeletedFK[$key] = "'{$this->id}'";
+                                        elseif ($AQ->multiple) $notDeletedFK[$key] = "$key = '{$this->id}'";
                                     }
                                     $relSave = $relModel->save();
 
