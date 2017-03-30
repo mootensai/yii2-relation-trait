@@ -64,6 +64,9 @@ trait RelationTrait
                             if (array_filter($relPost)) {
                                 /* @var $relObj ActiveRecord */
                                 $relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
+                                if (is_null($relObj)) {
+                                    $relObj = new $relModelClass();
+                                }
                                 $relObj->load($relPost, '');
                                 $container[] = $relObj;
                             }
@@ -326,14 +329,14 @@ trait RelationTrait
             if ($method->name === 'deleteWithRelated') {
                 continue;
             }
-            if (strpos($method->name, 'get') === false) {
+            if (strpos($method->name, 'get') !== 0) {
                 continue;
             }
             try {
                 $rel = call_user_func(array($this, $method->name));
                 if ($rel instanceof \yii\db\ActiveQuery) {
-                    $name = lcfirst(str_replace('get', '', $method->name));
-                    $stack[$name]['name'] = lcfirst(str_replace('get', '', $method->name));
+                    $name = lcfirst(preg_replace('/^get/', '', $method->name));
+                    $stack[$name]['name'] = lcfirst(preg_replace('/^get/', '', $method->name));
                     $stack[$name]['method'] = $method->name;
                     $stack[$name]['ismultiple'] = $rel->multiple;
                     $stack[$name]['modelClass'] = $rel->modelClass;
