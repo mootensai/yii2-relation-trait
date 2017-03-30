@@ -264,6 +264,7 @@ trait RelationTrait
             $error = false;
             $relData = $this->getRelationData();
             foreach ($relData as $data) {
+                $array = [];
                 if ($data['ismultiple']) {
                     $link = $data['link'];
                     if (count($this->{$data['name']})) {
