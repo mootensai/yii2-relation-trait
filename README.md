@@ -1,4 +1,6 @@
 # yii2-relation-trait
+
+[![Join the chat at https://gitter.im/mootensai/yii2-relation-trait](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mootensai/yii2-relation-trait?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Yii 2 Models add functionality for load with relation (loadAll($POST)), &amp; transactional save with relation (saveAll())
 
 [![Latest Stable Version](https://poser.pugx.org/mootensai/yii2-relation-trait/v/stable)](https://packagist.org/packages/mootensai/yii2-relation-trait)
