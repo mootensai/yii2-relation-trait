@@ -350,23 +350,24 @@ trait RelationTrait
                 }
             }
         } else {
-            foreach ($this->autoRelationMethodNameEnabled as $methodName) {
+             foreach ($this->autoRelationMethodNameEnabled as $methodName) {
 
-                try {
-                    $rel = call_user_func(array($this, $methodName));
-                    if ($rel instanceof \yii\db\ActiveQuery) {
-                        $name = lcfirst(str_replace('get', '', $methodName));
-                        $stack[$name]['name'] = lcfirst(str_replace('get', '', $methodName));
-                        $stack[$name]['method'] = $methodName;
-                        $stack[$name]['ismultiple'] = $rel->multiple;
-                        $stack[$name]['modelClass'] = $rel->modelClass;
-                        $stack[$name]['link'] = $rel->link;
-                        $stack[$name]['via'] = $rel->via;
-                    }
-                } catch (\yii\base\ErrorException $exc) {
-                    //if method name can't be called,
-                }
-        }
+                 try {
+                     $rel = call_user_func(array($this, $methodName));
+                     if ($rel instanceof \yii\db\ActiveQuery) {
+                         $name = lcfirst(str_replace('get', '', $methodName));
+                         $stack[$name]['name'] = lcfirst(str_replace('get', '', $methodName));
+                         $stack[$name]['method'] = $methodName;
+                         $stack[$name]['ismultiple'] = $rel->multiple;
+                         $stack[$name]['modelClass'] = $rel->modelClass;
+                         $stack[$name]['link'] = $rel->link;
+                         $stack[$name]['via'] = $rel->via;
+                     }
+                 } catch (\yii\base\ErrorException $exc) {
+                     //if method name can't be called,
+                 }
+             }
+         }
         return $stack;
     }
 
