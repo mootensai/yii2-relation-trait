@@ -1,27 +1,21 @@
 {
-    "name": "mootensai/yii2-relation-trait",
+    "name": "stesi/yii2-relation-trait",
     "type": "yii2-extension",
     "description": "Yii 2 Models load with relation, & transaction save with relation",
     "keywords": ["Yii2","relation","load","save","transaction","loadwithrelation", "savewithrelation", "related", "saveall", "loadall"],
-    "homepage": "http://github.com/mootensai/yii2-relation-trait",
+    "homepage": "https://github.com/stesi/yii2-relation-trait
     "license": "BSD-3-Clause",
     "support": {
-        "issues": "https://github.com/mootensai/yii2-relation-trait/issues",
-        "source": "https://github.com/mootensai/yii2-relation-trait"
+        "issues": "https://github.com/stesi/yii2-relation-trait/issues",
+        "source": "https://github.com/stesi/yii2-relation-trait"
     },
-    "authors": [
-        {
-            "name": "Yohanes Candrajaya",
-            "email": "moo.tensai@gmail.com"
-        }
-    ],
     "require": {
         "php": ">=5.4.0",
         "yiisoft/yii2": "~2.0"
     },
     "autoload": {
 	"psr-4": {
-	    "mootensai\\relation\\": ""
+	    "stesi\\relation\\": ""
 	}
     }
 }
