@@ -7,7 +7,7 @@
  * @since 1.0
  */
 
-namespace mootensai\relation;
+namespace stesi\relation;
 
 use yii\db\ActiveQuery;
 use \yii\db\ActiveRecord;
