@@ -9,12 +9,6 @@ Yii 2 Models add functionality for load with relation (loadAll($POST)), &amp; tr
 [![Join the chat at https://gitter.im/mootensai/yii2-relation-trait](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mootensai/yii2-relation-trait?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mootensai/yii2-relation-trait/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
-## Support
-
-[![Support via Gratipay](https://cdn.rawgit.com/gratipay/gratipay-badge/2.3.0/dist/gratipay.svg)](https://gratipay.com/mootensai/)
-
-https://www.paypal.me/yohanesc
-
 
 ## Installation
 
@@ -23,13 +17,13 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```bash
-$ composer require 'mootensai/yii2-relation-trait:dev-master'
+$ composer require 'stesi/yii2-relation-trait:dev-master'
 ```
 
 or add
 
 ```
-"mootensai/yii2-relation-trait": "*"
+"stesi/yii2-relation-trait": "*"
 ```
 
 to the `require` section of your `composer.json` file.
