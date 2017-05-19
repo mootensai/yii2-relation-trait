@@ -297,56 +297,75 @@ trait RelationTrait
 
     public function getRelationData()
     {
-        $ARMethods = get_class_methods('\yii\db\ActiveRecord');
-        $modelMethods = get_class_methods('\yii\base\Model');
-        $reflection = new \ReflectionClass($this);
-        $stack = [];
-        /* @var $method \ReflectionMethod */
-        foreach ($reflection->getMethods() as $method) {
-            if (in_array($method->name, $ARMethods) || in_array($method->name, $modelMethods)) {
-                continue;
-            }
-            if ($method->name === 'bindModels') {
-                continue;
-            }
-            if ($method->name === 'attachBehaviorInternal') {
-                continue;
-            }
-            if ($method->name === 'loadAll') {
-                continue;
-            }
-            if ($method->name === 'saveAll') {
-                continue;
-            }
-            if ($method->name === 'getRelationData') {
-                continue;
-            }
-            if ($method->name === 'getAttributesWithRelatedAsPost') {
-                continue;
-            }
-            if ($method->name === 'getAttributesWithRelated') {
-                continue;
-            }
-            if ($method->name === 'deleteWithRelated') {
-                continue;
-            }
-            if (strpos($method->name, 'get') !== 0) {
-                continue;
-            }
-            try {
-                $rel = call_user_func(array($this, $method->name));
-                if ($rel instanceof \yii\db\ActiveQuery) {
-                    $name = lcfirst(preg_replace('/^get/', '', $method->name));
-                    $stack[$name]['name'] = lcfirst(preg_replace('/^get/', '', $method->name));
-                    $stack[$name]['method'] = $method->name;
-                    $stack[$name]['ismultiple'] = $rel->multiple;
-                    $stack[$name]['modelClass'] = $rel->modelClass;
-                    $stack[$name]['link'] = $rel->link;
-                    $stack[$name]['via'] = $rel->via;
+         if (!isset($this->autoRelationMethodNameEnabled)) {
+            $ARMethods = get_class_methods('\yii\db\ActiveRecord');
+            $modelMethods = get_class_methods('\yii\base\Model');
+            $reflection = new \ReflectionClass($this);
+            $stack = [];
+            /* @var $method \ReflectionMethod */
+            foreach ($reflection->getMethods() as $method) {
+                if (in_array($method->name, $ARMethods) || in_array($method->name, $modelMethods)) {
+                    continue;
                 }
-            } catch (\yii\base\ErrorException $exc) {
-                //if method name can't be called,
+                if ($method->name === 'bindModels') {
+                    continue;
+                }
+                if ($method->name === 'attachBehaviorInternal') {
+                    continue;
+                }
+                if ($method->name === 'loadAll') {
+                    continue;
+                }
+                if ($method->name === 'saveAll') {
+                    continue;
+                }
+                if ($method->name === 'getRelationData') {
+                    continue;
+                }
+                if ($method->name === 'getAttributesWithRelatedAsPost') {
+                    continue;
+                }
+                if ($method->name === 'getAttributesWithRelated') {
+                    continue;
+                }
+                if ($method->name === 'deleteWithRelated') {
+                    continue;
+                }
+                if (strpos($method->name, 'get') === false) {
+                    continue;
+                }
+                try {
+                    $rel = call_user_func(array($this, $method->name));
+                    if ($rel instanceof \yii\db\ActiveQuery) {
+                        $name = lcfirst(str_replace('get', '', $method->name));
+                        $stack[$name]['name'] = lcfirst(str_replace('get', '', $method->name));
+                        $stack[$name]['method'] = $method->name;
+                        $stack[$name]['ismultiple'] = $rel->multiple;
+                        $stack[$name]['modelClass'] = $rel->modelClass;
+                        $stack[$name]['link'] = $rel->link;
+                        $stack[$name]['via'] = $rel->via;
+                    }
+                } catch (\yii\base\ErrorException $exc) {
+                    //if method name can't be called,
+                }
             }
+        } else {
+            foreach ($this->autoRelationMethodNameEnabled as $methodName) {
+
+                try {
+                    $rel = call_user_func(array($this, $methodName));
+                    if ($rel instanceof \yii\db\ActiveQuery) {
+                        $name = lcfirst(str_replace('get', '', $methodName));
+                        $stack[$name]['name'] = lcfirst(str_replace('get', '', $methodName));
+                        $stack[$name]['method'] = $methodName;
+                        $stack[$name]['ismultiple'] = $rel->multiple;
+                        $stack[$name]['modelClass'] = $rel->modelClass;
+                        $stack[$name]['link'] = $rel->link;
+                        $stack[$name]['via'] = $rel->via;
+                    }
+                } catch (\yii\base\ErrorException $exc) {
+                    //if method name can't be called,
+                }
         }
         return $stack;
     }
