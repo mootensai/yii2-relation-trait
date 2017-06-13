@@ -29,11 +29,11 @@ trait RelationTrait
                     /* @var $relObj ActiveRecord */
                     $isHasMany = is_array($value) && is_array(current($value));
                     $relName = ($isHasMany) ? lcfirst(Inflector::pluralize($key)) : lcfirst($key);
-                    
-                    if (in_array($relName, $skippedRelations) || !array_key_exists($relName,$relData)){
+
+                    if (in_array($relName, $skippedRelations) || !array_key_exists($relName, $relData)) {
                         continue;
                     }
-                    
+
                     $AQ = $this->getRelation($relName);
                     $relModelClass = $AQ->modelClass;
                     $relPKAttr = $relModelClass::primaryKey();
@@ -64,9 +64,6 @@ trait RelationTrait
                             if (array_filter($relPost)) {
                                 /* @var $relObj ActiveRecord */
                                 $relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
-                                if (is_null($relObj)) {
-                                    $relObj = new $relModelClass();
-                                }
                                 $relObj->load($relPost, '');
                                 $container[] = $relObj;
                             }
@@ -100,9 +97,6 @@ trait RelationTrait
                         if (in_array($name, $skippedRelations))
                             continue;
 
-                        unset($fields);
-                        $fields = array();
-                        
                         if (!empty($records)) {
                             $AQ = $this->getRelation($name);
                             $link = $AQ->link;
@@ -117,7 +111,7 @@ trait RelationTrait
                                     foreach ($link as $key => $value) {
                                         $relModel->$key = $this->$value;
                                         if ($isManyMany) $notDeletedFK[$key] = $this->$value;
-                                        elseif ($AQ->multiple) $notDeletedFK[$key] = "\"$key\" = '{$this->$value}'";
+                                        elseif ($AQ->multiple) $notDeletedFK[$key] = "$key = '{$this->$value}'";
                                     }
                                     $relSave = $relModel->save();
 
@@ -159,10 +153,11 @@ trait RelationTrait
                                         }
                                         array_push($notIn, $content);
                                         array_push($compiledNotDeletedPK, $notIn);
+                                        $relModel->deleteAll($compiledNotDeletedPK);
                                         try {
                                             $relModel->deleteAll($compiledNotDeletedPK);
                                         } catch (\yii\db\IntegrityException $exc) {
-                                            $this->addError($name, "Data can't be deleted because it's still used by another data.");
+                                            $this->addError($name, \Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
                                             $error = true;
                                         }
                                     } else {
@@ -172,7 +167,7 @@ trait RelationTrait
                                             try {
                                                 $relModel->deleteAll($notDeletedFK . ' AND ' . $relPKAttr[0] . " NOT IN ($compiledNotDeletedPK)");
                                             } catch (\yii\db\IntegrityException $exc) {
-                                                $this->addError($name, "Data can't be deleted because it's still used by another data.");
+                                                $this->addError($name, \Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
                                                 $error = true;
                                             }
                                         }
@@ -264,7 +259,6 @@ trait RelationTrait
             $error = false;
             $relData = $this->getRelationData();
             foreach ($relData as $data) {
-                $array = [];
                 if ($data['ismultiple']) {
                     $link = $data['link'];
                     if (count($this->{$data['name']})) {
@@ -297,7 +291,7 @@ trait RelationTrait
 
     public function getRelationData()
     {
-         if (!isset($this->autoRelationMethodNameEnabled)) {
+        if (!isset($this->autoRelationMethodNameEnabled)) {
             $ARMethods = get_class_methods('\yii\db\ActiveRecord');
             $modelMethods = get_class_methods('\yii\base\Model');
             $reflection = new \ReflectionClass($this);
@@ -350,24 +344,24 @@ trait RelationTrait
                 }
             }
         } else {
-             foreach ($this->autoRelationMethodNameEnabled as $methodName) {
+            foreach ($this->autoRelationMethodNameEnabled as $methodName) {
 
-                 try {
-                     $rel = call_user_func(array($this, $methodName));
-                     if ($rel instanceof \yii\db\ActiveQuery) {
-                         $name = lcfirst(str_replace('get', '', $methodName));
-                         $stack[$name]['name'] = lcfirst(str_replace('get', '', $methodName));
-                         $stack[$name]['method'] = $methodName;
-                         $stack[$name]['ismultiple'] = $rel->multiple;
-                         $stack[$name]['modelClass'] = $rel->modelClass;
-                         $stack[$name]['link'] = $rel->link;
-                         $stack[$name]['via'] = $rel->via;
-                     }
-                 } catch (\yii\base\ErrorException $exc) {
-                     //if method name can't be called,
-                 }
-             }
-         }
+                try {
+                    $rel = call_user_func(array($this, $methodName));
+                    if ($rel instanceof \yii\db\ActiveQuery) {
+                        $name = lcfirst(str_replace('get', '', $methodName));
+                        $stack[$name]['name'] = lcfirst(str_replace('get', '', $methodName));
+                        $stack[$name]['method'] = $methodName;
+                        $stack[$name]['ismultiple'] = $rel->multiple;
+                        $stack[$name]['modelClass'] = $rel->modelClass;
+                        $stack[$name]['link'] = $rel->link;
+                        $stack[$name]['via'] = $rel->via;
+                    }
+                } catch (\yii\base\ErrorException $exc) {
+                    //if method name can't be called,
+                }
+            }
+        }
         return $stack;
     }
 
