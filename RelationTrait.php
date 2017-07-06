@@ -122,7 +122,7 @@ trait RelationTrait
                                     $relSave = $relModel->save();
 
                                     if (!$relSave || !empty($relModel->errors)) {
-                                        $relModelWords = Inflector::camel2words(StringHelper::basename($AQ->modelClass));
+                                        $relModelWords = \Yii::t('app', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
                                         $index++;
                                         foreach ($relModel->errors as $validation) {
                                             foreach ($validation as $errorMsg) {
@@ -185,7 +185,7 @@ trait RelationTrait
                                 }
                                 $relSave = $records->save();
                                 if (!$relSave || !empty($records->errors)) {
-                                    $recordsWords = Inflector::camel2words(StringHelper::basename($AQ->modelClass));
+                                    $recordsWords = \Yii::t('app', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
                                     foreach ($records->errors as $validation) {
                                         foreach ($validation as $errorMsg) {
                                             $this->addError($name, "$recordsWords : $errorMsg");
