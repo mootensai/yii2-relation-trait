@@ -51,7 +51,7 @@ trait RelationTrait
                                 $condition = [];
                                 $condition[$relPKAttr[0]] = $this->primaryKey;
                                 foreach ($relPost as $relAttr => $relAttrVal) {
-                                    if (in_array($relAttr, $relPKAttr)){
+                                    if (in_array($relAttr, $relPKAttr)) {
                                         $condition[$relAttr] = $relAttrVal;
                                     }
                                 }
@@ -104,7 +104,7 @@ trait RelationTrait
                     /* @var $records ActiveRecord */
                     foreach ($this->relatedRecords as $name => $records) {
 
-                        if (in_array($name, $skippedRelations)){
+                        if (in_array($name, $skippedRelations)) {
                             continue;
                         }
 
@@ -397,7 +397,7 @@ trait RelationTrait
         ];
         $globalConfig = ArrayHelper::getValue(Yii::$app->i18n->translations, "mtrelt*", []);
         if (!empty($globalConfig)) {
-            $config = array_merge($config, is_array($globalConfig) ? $globalConfig : (array)$globalConfig);
+            $config = array_merge($config, is_array($globalConfig) ? $globalConfig : (array) $globalConfig);
         }
         Yii::$app->i18n->translations["mtrelt*"] = $config;
     }
