@@ -260,14 +260,12 @@ trait RelationTrait
                 if ($data['ismultiple'] && !in_array($data['name'], $skippedRelations)) {
                     $link = $data['link'];
                     if (count($this->{$data['name']})) {
-                        $relPKAttr = $this->{$data['name']}[0]->primaryKey();
-//                        $isCompositePK = (count($relPKAttr) > 1); // unused
                         foreach ($link as $key => $value) {
                             if (isset($this->$value)) {
                                 $array[$key] = $this->$value;
                             }
                         }
-//                        $error = !$this->{$data['name']}[0]->deleteAll(['and', $array]);
+                        $error = !$this->{$data['name']}[0]->deleteAll(['and', $array]);
                     }
                 }
             }
