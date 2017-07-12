@@ -51,8 +51,9 @@ trait RelationTrait
                                 $condition = [];
                                 $condition[$relPKAttr[0]] = $this->primaryKey;
                                 foreach ($relPost as $relAttr => $relAttrVal) {
-                                    if (in_array($relAttr, $relPKAttr))
+                                    if (in_array($relAttr, $relPKAttr)){
                                         $condition[$relAttr] = $relAttrVal;
+                                    }
                                 }
                                 $relObj = $relModelClass::findOne($condition);
                                 if (is_null($relObj)) {
@@ -103,8 +104,9 @@ trait RelationTrait
                     /* @var $records ActiveRecord */
                     foreach ($this->relatedRecords as $name => $records) {
 
-                        if (in_array($name, $skippedRelations))
+                        if (in_array($name, $skippedRelations)){
                             continue;
+                        }
 
                         if (!empty($records)) {
                             $AQ = $this->getRelation($name);
