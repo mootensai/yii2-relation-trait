@@ -10,9 +10,11 @@
 namespace mootensai\relation;
 
 use Yii;
+use yii\base\ErrorException;
 use yii\db\ActiveQuery;
 use \yii\db\ActiveRecord;
 use \yii\db\Exception;
+use yii\db\IntegrityException;
 use \yii\helpers\Inflector;
 use \yii\helpers\StringHelper;
 use yii\helpers\ArrayHelper;
@@ -37,6 +39,7 @@ trait RelationTrait
                     }
 
                     $AQ = $this->getRelation($relName);
+                    /* @var $relModelClass ActiveRecord */
                     $relModelClass = $AQ->modelClass;
                     $relPKAttr = $relModelClass::primaryKey();
                     $isManyMany = count($relPKAttr) > 1;
@@ -97,6 +100,7 @@ trait RelationTrait
             if ($this->save()) {
                 $error = false;
                 if (!empty($this->relatedRecords)) {
+                    /* @var $records ActiveRecord */
                     foreach ($this->relatedRecords as $name => $records) {
 
                         if (in_array($name, $skippedRelations))
@@ -106,12 +110,12 @@ trait RelationTrait
                             $AQ = $this->getRelation($name);
                             $link = $AQ->link;
                             $notDeletedPK = [];
+                            $notDeletedFK = [];
                             $relPKAttr = ($AQ->multiple) ? $records[0]->primaryKey() : $records->primaryKey();
                             $isManyMany = (count($relPKAttr) > 1);
                             if ($AQ->multiple) {
                                 /* @var $relModel ActiveRecord */
                                 foreach ($records as $index => $relModel) {
-                                    $notDeletedFK = [];
                                     foreach ($link as $key => $value) {
                                         $relModel->$key = $this->$value;
                                         $notDeletedFK[$key] = $this->$value;
@@ -119,7 +123,7 @@ trait RelationTrait
                                     $relSave = $relModel->save();
 
                                     if (!$relSave || !empty($relModel->errors)) {
-                                        $relModelWords = \Yii::t('app', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
+                                        $relModelWords = Yii::t('app', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
                                         $index++;
                                         foreach ($relModel->errors as $validation) {
                                             foreach ($validation as $errorMsg) {
@@ -152,7 +156,7 @@ trait RelationTrait
                                         }
                                         try {
                                             $relModel->deleteAll($query);
-                                        } catch (\yii\db\IntegrityException $exc) {
+                                        } catch (IntegrityException $exc) {
                                             $this->addError($name, "Data can't be deleted because it's still used by another data.");
                                             $error = true;
                                         }
@@ -162,7 +166,7 @@ trait RelationTrait
                                         if (!empty($notDeletedPK)) {
                                             try {
                                                 $relModel->deleteAll($query);
-                                            } catch (\yii\db\IntegrityException $exc) {
+                                            } catch (IntegrityException $exc) {
                                                 $this->addError($name, "Data can't be deleted because it's still used by another data.");
                                                 $error = true;
                                             }
@@ -176,7 +180,7 @@ trait RelationTrait
                                 }
                                 $relSave = $records->save();
                                 if (!$relSave || !empty($records->errors)) {
-                                    $recordsWords = \Yii::t('app', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
+                                    $recordsWords = Yii::t('app', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
                                     foreach ($records->errors as $validation) {
                                         foreach ($validation as $errorMsg) {
                                             $this->addError($name, "$recordsWords : $errorMsg");
@@ -209,8 +213,8 @@ trait RelationTrait
                                 }
                                 try {
                                     $relModel->deleteAll(['and', $condition]);
-                                } catch (\yii\db\IntegrityException $exc) {
-                                    $this->addError($relData[$relName]['name'], \Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
+                                } catch (IntegrityException $exc) {
+                                    $this->addError($relData[$relName]['name'], Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
                                     $error = true;
                                 }
                             } else {
@@ -220,8 +224,8 @@ trait RelationTrait
                                     }
                                     try {
                                         $relModel->deleteAll(['and', $condition]);
-                                    } catch (\yii\db\IntegrityException $exc) {
-                                        $this->addError($relData[$relName]['name'], \Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
+                                    } catch (IntegrityException $exc) {
+                                        $this->addError($relData[$relName]['name'], Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
                                         $error = true;
                                     }
                                 }
@@ -282,6 +286,7 @@ trait RelationTrait
             $trans->rollBack();
             throw $exc;
         }
+        return false;
     }
 
 
@@ -310,7 +315,7 @@ trait RelationTrait
             }
             try {
                 $rel = call_user_func(array($this, $method->name));
-                if ($rel instanceof \yii\db\ActiveQuery) {
+                if ($rel instanceof ActiveQuery) {
                     $name = lcfirst(preg_replace('/^get/', '', $method->name));
                     $stack[$name]['name'] = lcfirst(preg_replace('/^get/', '', $method->name));
                     $stack[$name]['method'] = $method->name;
@@ -319,7 +324,7 @@ trait RelationTrait
                     $stack[$name]['link'] = $rel->link;
                     $stack[$name]['via'] = $rel->via;
                 }
-            } catch (\yii\base\ErrorException $exc) {
+            } catch (ErrorException $exc) {
                 //if method name can't be called,
             }
         }
@@ -374,8 +379,6 @@ trait RelationTrait
      * source : https://github.com/kartik-v/yii2-krajee-base/blob/master/TranslationTrait.php
      * Edited by : Yohanes Candrajaya <moo.tensai@gmail.com>
      *
-     * @param string $dir the directory path where translation files will exist
-     * @param string $cat the message category
      *
      * @return void
      */
