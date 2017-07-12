@@ -32,7 +32,7 @@ trait RelationTrait
                     $isHasMany = is_array($value) && is_array(current($value));
                     $relName = ($isHasMany) ? lcfirst(Inflector::pluralize($key)) : lcfirst($key);
 
-                    if (in_array($relName, $skippedRelations) || !array_key_exists($relName,$relData)){
+                    if (in_array($relName, $skippedRelations) || !array_key_exists($relName, $relData)) {
                         continue;
                     }
 
@@ -130,8 +130,11 @@ trait RelationTrait
                                     } else {
                                         //GET PK OF REL MODEL
                                         if ($isManyMany) {
+                                            $mainPK = array_keys($link)[0];
                                             foreach ($relModel->primaryKey as $attr => $value) {
-                                                $notDeletedPK[$attr][] = $value;
+                                                if ($attr != $mainPK) {
+                                                    $notDeletedPK[$attr][] = $value;
+                                                }
                                             }
                                         } else {
                                             $notDeletedPK[] = $relModel->primaryKey;
@@ -142,9 +145,13 @@ trait RelationTrait
                                     //DELETE WITH 'NOT IN' PK MODEL & REL MODEL
                                     if ($isManyMany) {
                                         // Many Many
-                                        $notIn = ['not in', $notDeletedPK];
+                                        $query = ['and', $notDeletedFK];
+                                        foreach ($notDeletedPK as $attr => $value) {
+                                            $notIn = ['not in', $attr, $value];
+                                            array_push($query, $notIn);
+                                        }
                                         try {
-                                            $relModel->deleteAll(['and', $notDeletedFK,$notIn]);
+                                            $relModel->deleteAll($query);
                                         } catch (\yii\db\IntegrityException $exc) {
                                             $this->addError($name, "Data can't be deleted because it's still used by another data.");
                                             $error = true;
@@ -180,7 +187,7 @@ trait RelationTrait
                             }
                         }
                     }
-                }else{
+                } else {
                     //No Children left
                     $relAvail = array_keys($this->relatedRecords);
                     $relData = $this->getRelationData();
@@ -260,7 +267,7 @@ trait RelationTrait
                                 $array[$key] = $this->$value;
                             }
                         }
-                        $error = !$this->{$data['name']}[0]->deleteAll(['and', $array]);
+//                        $error = !$this->{$data['name']}[0]->deleteAll(['and', $array]);
                     }
                 }
             }
