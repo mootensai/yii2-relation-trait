@@ -7,7 +7,6 @@ Yii 2 Models add functionality for load with relation (loadAll($POST)), &amp; tr
 [![Monthly Downloads](https://poser.pugx.org/mootensai/yii2-relation-trait/d/monthly)](https://packagist.org/packages/mootensai/yii2-relation-trait)
 [![Daily Downloads](https://poser.pugx.org/mootensai/yii2-relation-trait/d/daily)](https://packagist.org/packages/mootensai/yii2-relation-trait)
 [![Join the chat at https://gitter.im/mootensai/yii2-relation-trait](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mootensai/yii2-relation-trait?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mootensai/yii2-relation-trait/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
 ## Support
 
@@ -36,6 +35,7 @@ to the `require` section of your `composer.json` file.
 
 
 ## Usage At Model
+
 ```php
 class MyModel extends ActiveRecord{
     use \mootensai\relation\RelationTrait;
@@ -43,6 +43,7 @@ class MyModel extends ActiveRecord{
 ```
 
 ## Array Input & Usage At Controller
+
 It takes a normal array of POST. This is the example
 
 ```php
@@ -54,9 +55,10 @@ if($model->loadAll(Yii:$app->request->post()) && $model->saveAll()){
 }
 ```
 
-#Features
+# Features
 
 ## Array Output  
+
 ```php
 // I use this to send model & related through JSON / Serialize
 print_r($model->getAttributesWithRelatedAsPost());
@@ -104,29 +106,68 @@ Array
 ```
 
 ## Use Transaction
+
 So your data will be atomic
 (see : http://en.wikipedia.org/wiki/ACID)
 
 ## Use Normal Save
+
 So your behaviors still works
 
 ## Add Validation At Main Model
+
 ```php
 $form->errorSummary($model);
 ```
+
 will give you
+
 ```
 <<Related Class Name>> #<<index + 1>> : <<error message>>
 My Related Model #1 : Attribute is required
 ```
+
 ## It Works On Auto Incremental PK Or Not (I Have Tried Use UUID)
+
 See here if you want to use my behavior :
+
 https://github.com/mootensai/yii2-uuid-behavior
 
-#To Do
-Test it on another DB. I only test it on MySQL.
+## Soft Delete
 
-I'm open for any improvement
+Add this line to your Model to enable soft delete
+
+`private $_rt_softdelete = ['<column>' => <deleted row marker value>];`
+
+Example : 
+
+`private $_rt_softdelete = ['isdeleted' => 1];`
+
+Or :
+
+`private $_rt_softdelete = ['deleted_by' => Yii::app()->user->id]`
+
+And add this line to your Model to enable soft restore
+
+`private $_rt_softrestore = ['<column>' => <undeleted row marker value];` 
+
+example :
+
+`private $_rt_softrestore = ['isdeleted' => 0];`
+
+or :
+
+`private $_rt_softdelete = ['deleted_by' => 0];`
+
+## Should work on Yii's supported DB
+
+As it used all Yii's Active Query or Active Record to execute DB command
+    
+
+### I'm open for any improvement
+Please create issue if you got a problem or an idea for enhancement
+
+#### ~ SDG ~
 
 
 
