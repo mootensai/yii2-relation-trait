@@ -373,6 +373,8 @@ trait RelationTrait
         }
     }
 
+//    abstract protected function relationNames();
+
     public function getRelationData()
     {
         $stack = [];
@@ -450,6 +452,7 @@ trait RelationTrait
 
     public function getAttributesWithRelated()
     {
+        /* @var $this ActiveRecord */
         $return = $this->attributes;
         foreach ($this->relatedRecords as $name => $records) {
             $AQ = $this->getRelation($name);
