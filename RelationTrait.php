@@ -51,7 +51,7 @@ trait RelationTrait
                                 $condition = [];
                                 $condition[$relPKAttr[0]] = $this->primaryKey;
                                 foreach ($relPost as $relAttr => $relAttrVal) {
-                                    if (in_array($relAttr, $relPKAttr)){
+                                    if (in_array($relAttr, $relPKAttr)) {
                                         $condition[$relAttr] = $relAttrVal;
                                     }
                                 }
@@ -104,7 +104,7 @@ trait RelationTrait
                     /* @var $records ActiveRecord */
                     foreach ($this->relatedRecords as $name => $records) {
 
-                        if (in_array($name, $skippedRelations)){
+                        if (in_array($name, $skippedRelations)) {
                             continue;
                         }
 
@@ -279,16 +279,18 @@ trait RelationTrait
                 $trans->rollback();
                 return false;
             }
-            if ($this->delete()) {
+            try {
+                $this->delete();
                 $trans->commit();
                 return true;
+            } catch (ErrorException $exc) {
+                $trans->rollBack();
+                throw $exc;
             }
-            $trans->rollBack();
         } catch (Exception $exc) {
             $trans->rollBack();
             throw $exc;
         }
-        return false;
     }
 
 
