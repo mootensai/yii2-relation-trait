@@ -399,7 +399,7 @@ trait RelationTrait
         ];
         $globalConfig = ArrayHelper::getValue(Yii::$app->i18n->translations, "mtrelt*", []);
         if (!empty($globalConfig)) {
-            $config = array_merge($config, is_array($globalConfig) ? $globalConfig : (array)$globalConfig);
+            $config = array_merge($config, is_array($globalConfig) ? $globalConfig : (array) $globalConfig);
         }
         Yii::$app->i18n->translations["mtrelt*"] = $config;
     }
