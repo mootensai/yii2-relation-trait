@@ -3,6 +3,8 @@ Yii 2 Models add functionality for load with relation (loadAll($POST)), &amp; tr
 
 PLUS soft delete/restore feature!
 
+Best work with [mootensai/yii2-enhanced-gii](https://github.com/mootensai/yii2-enhanced-gii)
+
 [![Latest Stable Version](https://poser.pugx.org/mootensai/yii2-relation-trait/v/stable)](https://packagist.org/packages/mootensai/yii2-relation-trait)
 [![License](https://poser.pugx.org/mootensai/yii2-relation-trait/license)](https://packagist.org/packages/mootensai/yii2-relation-trait)
 [![Total Downloads](https://img.shields.io/packagist/dt/mootensai/yii2-relation-trait.svg?style=flat-square)](https://packagist.org/packages/mootensai/yii2-relation-trait)
