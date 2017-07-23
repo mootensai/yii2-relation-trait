@@ -119,9 +119,12 @@ trait RelationTrait
                 if (!empty($this->relatedRecords)) {
                     /* @var $records ActiveRecord | ActiveRecord[] */
                     foreach ($this->relatedRecords as $name => $records) {
+                        if(in_array($name, $skippedRelations))
+                            continue;
+                        
                         $AQ = $this->getRelation($name);
                         $link = $AQ->link;
-                        if (!empty($records) && !in_array($name, $skippedRelations)) {
+                        if (!empty($records)) {
                             $notDeletedPK = [];
                             $notDeletedFK = [];
                             $relPKAttr = ($AQ->multiple) ? $records[0]->primaryKey() : $records->primaryKey();
