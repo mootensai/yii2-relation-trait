@@ -119,9 +119,9 @@ trait RelationTrait
                 if (!empty($this->relatedRecords)) {
                     /* @var $records ActiveRecord | ActiveRecord[] */
                     foreach ($this->relatedRecords as $name => $records) {
-                        if(in_array($name, $skippedRelations))
+                        if (in_array($name, $skippedRelations))
                             continue;
-                        
+
                         $AQ = $this->getRelation($name);
                         $link = $AQ->link;
                         if (!empty($records)) {
@@ -197,21 +197,21 @@ trait RelationTrait
                                         }
                                     }
                                 }
-                            }
-                        } else {
-                            //Has One
-                            foreach ($link as $key => $value) {
-                                $records->$key = $this->$value;
-                            }
-                            $relSave = $records->save();
-                            if (!$relSave || !empty($records->errors)) {
-                                $recordsWords = Yii::t('app', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
-                                foreach ($records->errors as $validation) {
-                                    foreach ($validation as $errorMsg) {
-                                        $this->addError($name, "$recordsWords : $errorMsg");
-                                    }
+                            } else {
+                                //Has One
+                                foreach ($link as $key => $value) {
+                                    $records->$key = $this->$value;
                                 }
-                                $error = true;
+                                $relSave = $records->save();
+                                if (!$relSave || !empty($records->errors)) {
+                                    $recordsWords = Yii::t('app', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
+                                    foreach ($records->errors as $validation) {
+                                        foreach ($validation as $errorMsg) {
+                                            $this->addError($name, "$recordsWords : $errorMsg");
+                                        }
+                                    }
+                                    $error = true;
+                                }
                             }
                         }
                     }
