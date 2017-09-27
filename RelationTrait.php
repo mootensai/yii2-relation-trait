@@ -136,31 +136,21 @@ trait RelationTrait
                                         $relModel->$key = $this->$value;
                                         $notDeletedFK[$key] = $this->$value;
                                     }
-                                    $relSave = $relModel->save();
 
-                                    if (!$relSave || !empty($relModel->errors)) {
-                                        $relModelWords = Yii::t('app', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
-                                        $index++;
-                                        foreach ($relModel->errors as $validation) {
-                                            foreach ($validation as $errorMsg) {
-                                                $this->addError($name, "$relModelWords #$index : $errorMsg");
+                                    //GET PK OF REL MODEL
+                                    if ($isManyMany) {
+                                        $mainPK = array_keys($link)[0];
+                                        foreach ($relModel->primaryKey as $attr => $value) {
+                                            if ($attr != $mainPK) {
+                                                $notDeletedPK[$attr][] = $value;
                                             }
                                         }
-                                        $error = true;
                                     } else {
-                                        //GET PK OF REL MODEL
-                                        if ($isManyMany) {
-                                            $mainPK = array_keys($link)[0];
-                                            foreach ($relModel->primaryKey as $attr => $value) {
-                                                if ($attr != $mainPK) {
-                                                    $notDeletedPK[$attr][] = $value;
-                                                }
-                                            }
-                                        } else {
-                                            $notDeletedPK[] = $relModel->primaryKey;
-                                        }
+                                        $notDeletedPK[] = $relModel->primaryKey;
                                     }
+
                                 }
+
                                 if (!$isNewRecord) {
                                     //DELETE WITH 'NOT IN' PK MODEL & REL MODEL
                                     if ($isManyMany) {
@@ -195,6 +185,21 @@ trait RelationTrait
                                                 $error = true;
                                             }
                                         }
+                                    }
+                                }
+
+                                foreach ($records as $index => $relModel) {
+                                    $relSave = $relModel->save();
+
+                                    if (!$relSave || !empty($relModel->errors)) {
+                                        $relModelWords = Yii::t('app', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
+                                        $index++;
+                                        foreach ($relModel->errors as $validation) {
+                                            foreach ($validation as $errorMsg) {
+                                                $this->addError($name, "$relModelWords #$index : $errorMsg");
+                                            }
+                                        }
+                                        $error = true;
                                     }
                                 }
                             } else {
