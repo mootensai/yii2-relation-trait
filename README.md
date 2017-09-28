@@ -18,6 +18,9 @@ Best work with [mootensai/yii2-enhanced-gii](https://github.com/mootensai/yii2-e
 
 https://www.paypal.me/yohanesc
 
+Endorse me on LinkedIn
+
+https://www.linkedin.com/in/yohanes-candrajaya-b68394102/
 
 ## Installation
 
