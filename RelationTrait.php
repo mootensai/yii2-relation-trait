@@ -19,93 +19,142 @@ use \yii\helpers\Inflector;
 use \yii\helpers\StringHelper;
 use yii\helpers\ArrayHelper;
 
+/*
+ *  add this line to your Model to enable soft delete
+ *
+ * private $_rt_softdelete;
+ *
+ * function __construct(){
+ *      $this->_rt_softdelete = [
+ *          '<column>' => <undeleted row marker value>
+ *          // multiple row marker column example
+ *          'isdeleted' => 1,
+ *          'deleted_by' => \Yii::$app->user->id,
+ *          'deleted_at' => date('Y-m-d H:i:s')
+ *      ];
+ * }
+ * add this line to your Model to enable soft restore
+ * private $_rt_softrestore;
+ *
+ * function __construct(){
+ *      $this->_rt_softrestore = [
+ *          '<column>' => <undeleted row marker value>
+ *          // multiple row marker column example
+ *          'isdeleted' => 0,
+ *          'deleted_by' => 0,
+ *          'deleted_at' => 'NULL'
+ *      ];
+ * }
+ */
+
 trait RelationTrait
 {
-    /* add this line to your Model to enable soft delete
-     *
-     * private $_rt_softdelete = ['<column>' => <deleted row marker value>];
-     * example :
-     * private $_rt_softdelete = ['isdeleted' => 1];
-     * or :
-     * private $_rt_softdelete = ['deleted_by' => Yii::app()->user->id]
-     * add this line to your Model to enable soft restore
-     * private $_rt_softrestore = ['<column>' => <undeleted row marker value];
-     * example :
-     * private $_rt_softrestore = ['isdeleted' => 0];
-     * or :
-     * private $_rt_softdelete = ['deleted_by' => 0];
-    */
 
+    /**
+     * Load all attribute including related attribute
+     * @param $POST
+     * @param array $skippedRelations
+     * @return bool
+     */
     public function loadAll($POST, $skippedRelations = [])
     {
         if ($this->load($POST)) {
             $shortName = StringHelper::basename(get_class($this));
             $relData = $this->getRelationData();
-            foreach ($POST as $key => $value) {
-                if ($key != $shortName && strpos($key, '_') === false) {
-                    /* @var $AQ ActiveQuery */
-                    /* @var $this ActiveRecord */
-                    /* @var $relObj ActiveRecord */
-                    $isHasMany = is_array($value) && is_array(current($value));
-                    $relName = ($isHasMany) ? lcfirst(Inflector::pluralize($key)) : lcfirst($key);
-
-                    if (in_array($relName, $skippedRelations) || !array_key_exists($relName, $relData)) {
-                        continue;
-                    }
-
-                    $AQ = $this->getRelation($relName);
-                    /* @var $relModelClass ActiveRecord */
-                    $relModelClass = $AQ->modelClass;
-                    $relPKAttr = $relModelClass::primaryKey();
-                    $isManyMany = count($relPKAttr) > 1;
-
-                    if ($isManyMany) {
-                        $container = [];
-                        foreach ($value as $relPost) {
-                            if (array_filter($relPost)) {
-                                $condition = [];
-                                $condition[$relPKAttr[0]] = $this->primaryKey;
-                                foreach ($relPost as $relAttr => $relAttrVal) {
-                                    if (in_array($relAttr, $relPKAttr)) {
-                                        $condition[$relAttr] = $relAttrVal;
-                                    }
+            foreach ($POST as $model => $attr) {
+                if (is_array($attr)) {
+                    if ($model == $shortName) {
+                        foreach ($attr as $relName => $relAttr) {
+                            if (is_array($relAttr)) {
+                                $isHasMany = !ArrayHelper::isAssociative($relAttr);
+                                if (in_array($relName, $skippedRelations) || !array_key_exists($relName, $relData)) {
+                                    continue;
                                 }
-                                $relObj = $relModelClass::findOne($condition);
-                                if (is_null($relObj)) {
-                                    $relObj = new $relModelClass;
-                                }
-                                $relObj->load($relPost, '');
-                                $container[] = $relObj;
+
+                                return $this->loadToRelation($isHasMany, $relName, $relAttr);
                             }
                         }
-                        $this->populateRelation($relName, $container);
-                    } else if ($isHasMany) {
-                        $container = [];
-                        foreach ($value as $relPost) {
-                            if (array_filter($relPost)) {
-                                /* @var $relObj ActiveRecord */
-                                $relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass() : $relModelClass::findOne($relPost[$relPKAttr[0]]);
-                                if (is_null($relObj)) {
-                                    $relObj = new $relModelClass();
-                                }
-                                $relObj->load($relPost, '');
-                                $container[] = $relObj;
-                            }
-                        }
-                        $this->populateRelation($relName, $container);
                     } else {
-                        $relObj = (empty($value[$relPKAttr[0]])) ? new $relModelClass : $relModelClass::findOne($value[$relPKAttr[0]]);
-                        $relObj->load($value, '');
-                        $this->populateRelation($relName, $relObj);
+                        $isHasMany = is_array($attr) && is_array(current($attr));
+                        $relName = ($isHasMany) ? lcfirst(Inflector::pluralize($model)) : lcfirst($model);
+                        if (in_array($relName, $skippedRelations) || !array_key_exists($relName, $relData)) {
+                            continue;
+                        }
+
+                        return $this->loadToRelation($isHasMany, $relName, $attr);
                     }
                 }
             }
-            return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
+    /**
+     * Refactored from loadAll() function
+     * @param $isHasMany
+     * @param $relName
+     * @param $v
+     * @return bool
+     */
+    private function loadToRelation($isHasMany, $relName, $v)
+    {
+        /* @var $AQ ActiveQuery */
+        /* @var $this ActiveRecord */
+        /* @var $relObj ActiveRecord */
+        $AQ = $this->getRelation($relName);
+        /* @var $relModelClass ActiveRecord */
+        $relModelClass = $AQ->modelClass;
+        $relPKAttr = $relModelClass::primaryKey();
+        $isManyMany = count($relPKAttr) > 1;
+
+        if ($isManyMany) {
+            $container = [];
+            foreach ($v as $relPost) {
+                if (array_filter($relPost)) {
+                    $condition = [];
+                    $condition[$relPKAttr[0]] = $this->primaryKey;
+                    foreach ($relPost as $relAttr => $relAttrVal) {
+                        if (in_array($relAttr, $relPKAttr)) {
+                            $condition[$relAttr] = $relAttrVal;
+                        }
+                    }
+                    $relObj = $relModelClass::findOne($condition);
+                    if (is_null($relObj)) {
+                        $relObj = new $relModelClass;
+                    }
+                    $relObj->load($relPost, '');
+                    $container[] = $relObj;
+                }
+            }
+            $this->populateRelation($relName, $container);
+        } else if ($isHasMany) {
+            $container = [];
+            foreach ($v as $relPost) {
+                if (array_filter($relPost)) {
+                    /* @var $relObj ActiveRecord */
+                    $relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass() : $relModelClass::findOne($relPost[$relPKAttr[0]]);
+                    if (is_null($relObj)) {
+                        $relObj = new $relModelClass();
+                    }
+                    $relObj->load($relPost, '');
+                    $container[] = $relObj;
+                }
+            }
+            $this->populateRelation($relName, $container);
+        } else {
+            $relObj = (empty($v[$relPKAttr[0]])) ? new $relModelClass : $relModelClass::findOne($v[$relPKAttr[0]]);
+            $relObj->load($v, '');
+            $this->populateRelation($relName, $relObj);
+        }
+        return true;
+    }
+
+    /**
+     * Save model including all related model already loaded
+     * @param array $skippedRelations
+     * @return bool
+     * @throws Exception
+     */
     public function saveAll($skippedRelations = [])
     {
         /* @var $this ActiveRecord */
@@ -220,20 +269,36 @@ trait RelationTrait
                             }
                         }
                     }
-                } else {
-                    //No Children left
-                    $relAvail = array_keys($this->relatedRecords);
-                    $relData = $this->getRelationData();
-                    $allRel = array_keys($relData);
-                    $noChildren = array_diff($allRel, $relAvail);
+                }
 
-                    foreach ($noChildren as $relName) {
-                        /* @var $relModel ActiveRecord */
-                        if (empty($relData[$relName]['via']) && !in_array($relName, $skippedRelations)) {
-                            $relModel = new $relData[$relName]['modelClass'];
-                            $condition = [];
-                            $isManyMany = count($relModel->primaryKey()) > 1;
-                            if ($isManyMany) {
+                //No Children left
+                $relAvail = array_keys($this->relatedRecords);
+                $relData = $this->getRelationData();
+                $allRel = array_keys($relData);
+                $noChildren = array_diff($allRel, $relAvail);
+
+                foreach ($noChildren as $relName) {
+                    /* @var $relModel ActiveRecord */
+                    if (empty($relData[$relName]['via']) && !in_array($relName, $skippedRelations)) {
+                        $relModel = new $relData[$relName]['modelClass'];
+                        $condition = [];
+                        $isManyMany = count($relModel->primaryKey()) > 1;
+                        if ($isManyMany) {
+                            foreach ($relData[$relName]['link'] as $k => $v) {
+                                $condition[$k] = $this->$v;
+                            }
+                            try {
+                                if ($isSoftDelete) {
+                                    $relModel->updateAll($this->_rt_softdelete, ['and', $condition]);
+                                } else {
+                                    $relModel->deleteAll(['and', $condition]);
+                                }
+                            } catch (IntegrityException $exc) {
+                                $this->addError($relData[$relName]['name'], Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
+                                $error = true;
+                            }
+                        } else {
+                            if ($relData[$relName]['ismultiple']) {
                                 foreach ($relData[$relName]['link'] as $k => $v) {
                                     $condition[$k] = $this->$v;
                                 }
@@ -247,26 +312,11 @@ trait RelationTrait
                                     $this->addError($relData[$relName]['name'], Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
                                     $error = true;
                                 }
-                            } else {
-                                if ($relData[$relName]['ismultiple']) {
-                                    foreach ($relData[$relName]['link'] as $k => $v) {
-                                        $condition[$k] = $this->$v;
-                                    }
-                                    try {
-                                        if ($isSoftDelete) {
-                                            $relModel->updateAll($this->_rt_softdelete, ['and', $condition]);
-                                        } else {
-                                            $relModel->deleteAll(['and', $condition]);
-                                        }
-                                    } catch (IntegrityException $exc) {
-                                        $this->addError($relData[$relName]['name'], Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
-                                        $error = true;
-                                    }
-                                }
                             }
                         }
                     }
                 }
+
 
                 if ($error) {
                     $trans->rollback();
@@ -285,6 +335,13 @@ trait RelationTrait
         }
     }
 
+
+    /**
+     * Deleted model row with all related records
+     * @param array $skippedRelations
+     * @return bool
+     * @throws Exception
+     */
     public function deleteWithRelated($skippedRelations = [])
     {
         /* @var $this ActiveRecord */
@@ -338,6 +395,12 @@ trait RelationTrait
         }
     }
 
+    /**
+     * Restore soft deleted row including all related records
+     * @param array $skippedRelations
+     * @return bool
+     * @throws Exception
+     */
     public function restoreWithRelated($skippedRelations = [])
     {
         if (!isset($this->_rt_softrestore)) {
@@ -380,8 +443,6 @@ trait RelationTrait
             throw $exc;
         }
     }
-
-//    abstract protected function relationNames();
 
     public function getRelationData()
     {
@@ -437,8 +498,28 @@ trait RelationTrait
         return $stack;
     }
 
-    /* this function is deprecated */
-
+    /**
+     * This function is deprecated!
+     * Return array like this
+     * Array
+     * (
+     *      [MainClass] => Array
+     *          (
+     *              [attr1] => value1
+     *              [attr2] => value2
+     *          )
+     *
+     *      [RelatedClass] => Array
+     *          (
+     *              [0] => Array
+     *                  (
+     *                      [attr1] => value1
+     *                      [attr2] => value2
+     *                  )
+     *          )
+     * )
+     * @return array
+     */
     public function getAttributesWithRelatedAsPost()
     {
         $return = [];
@@ -458,6 +539,23 @@ trait RelationTrait
         return $return;
     }
 
+    /**
+     * return array like this
+     * Array
+     * (
+     *      [attr1] => value1
+     *      [attr2] => value2
+     *      [relationName] => Array
+     *          (
+     *              [0] => Array
+     *                  (
+     *                      [attr1] => value1
+     *                      [attr2] => value2
+     *                  )
+     *          )
+     *  )
+     * @return array
+     */
     public function getAttributesWithRelated()
     {
         /* @var $this ActiveRecord */
@@ -477,8 +575,6 @@ trait RelationTrait
 
     /**
      * TranslationTrait manages methods for all translations used in Krajee extensions
-     *
-     * @property array $i18n
      *
      * @author Kartik Visweswaran <kartikv2@gmail.com>
      * @since 1.8.8
