@@ -49,11 +49,56 @@ class MyModel extends ActiveRecord{
 ## Array Input & Usage At Controller
 
 It takes a normal array of POST. This is the example
+```php
+Array (
+    $_POST['ParentClass'] => ['attr1' => 'value1','attr2' => 'value2'],
+    // Has One
+    $_POST['RelatedClass'] => ['relAttr1' => 'value1','relAttr2' => 'value2'], 
+    // Has Many
+    $_POST['RelatedClass'] => Array
+        (
+            [0] => Array
+                (
+                    [attr1] => value1
+                    [attr2] => value2
+                )
+            [1] => Array
+                (
+                    [attr1] => value1
+                    [attr2] => value2
+                )
+        )      
+)
+
+OR
+
+$_POST['ParentClass'] = Array 
+    (
+        [attr1] => value1
+        [attr2] => value2 
+        // has many
+        [relationName] => Array 
+            ( 
+                [0] => Array 
+                    (
+                        [relAttr] => relValue1
+                    )
+                [1] => Array 
+                    (
+                        [relAttr] => relValue1
+                    )
+            )
+        // has one
+        [relationName] => Array
+            ( 
+                [relAttr1] => relValue1
+                [relAttr2] => relValue2
+            )
+    );
+```
 
 ```php
 // sample at controller
-//$_POST['ParentClass'] = ['attr1' => 'value1','attr2' => 'value2'];
-//$_POST['RelatedClass'][0] = ['attr1' => 'value1','attr2' => 'value2'];      
 if($model->loadAll(Yii:$app->request->post()) && $model->saveAll()){
     return $this->redirect(['view', 'id' => $model->id, 'created' => $model->created]);
 }
@@ -141,32 +186,40 @@ https://github.com/mootensai/yii2-uuid-behavior
 
 Add this line to your Model to enable soft delete
 
-`private $_rt_softdelete = ['<column>' => <deleted row marker value>];`
+```php
+private $_rt_softdelete;
 
-Example : 
+function __construct(){
+    $this->_rt_softdelete = [
+        '<column>' => <undeleted row marker value>
+        // multiple row marker column example
+        'isdeleted' => 1,
+        'deleted_by' => \Yii::$app->user->id,
+        'deleted_at' => date('Y-m-d H:i:s')
+    ];
+}
+```
 
-`private $_rt_softdelete = ['isdeleted' => 1];`
+Add this line to your Model to enable soft restore
 
-Or :
+```php
+private $_rt_softrestore;
 
-`private $_rt_softdelete = ['deleted_by' => Yii::app()->user->id]`
+function __construct(){
+    $this->_rt_softrestore = [
+        '<column>' => <undeleted row marker value>
+        // multiple row marker column example
+        'isdeleted' => 0,
+        'deleted_by' => 0,
+        'deleted_at' => 'NULL'
+    ];
+}
+```
 
-And add this line to your Model to enable soft restore
+### Should work on Yii's supported DB
 
-`private $_rt_softrestore = ['<column>' => <undeleted row marker value];` 
+It use all Yii's Active Query or Active Record to execute DB command
 
-example :
-
-`private $_rt_softrestore = ['isdeleted' => 0];`
-
-or :
-
-`private $_rt_softdelete = ['deleted_by' => 0];`
-
-## Should work on Yii's supported DB
-
-As it used all Yii's Active Query or Active Record to execute DB command
-    
 
 ### I'm open for any improvement
 Please create issue if you got a problem or an idea for enhancement
