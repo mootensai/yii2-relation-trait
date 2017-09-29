@@ -54,27 +54,6 @@ class MyModel extends ActiveRecord{
 It takes a normal array of POST. This is the example
 ```php
 Array (
-    $_POST['ParentClass'] => ['attr1' => 'value1','attr2' => 'value2'],
-    // Has One
-    $_POST['RelatedClass'] => ['relAttr1' => 'value1','relAttr2' => 'value2'], 
-    // Has Many
-    $_POST['RelatedClass'] => Array
-        (
-            [0] => Array
-                (
-                    [attr1] => value1
-                    [attr2] => value2
-                )
-            [1] => Array
-                (
-                    [attr1] => value1
-                    [attr2] => value2
-                )
-        )      
-)
-
-OR
-Array (
     $_POST['ParentClass'] => Array 
         (
             [attr1] => value1
@@ -98,6 +77,28 @@ Array (
                     [relAttr2] => relValue2
                 )
         )
+)
+
+OR
+
+Array (
+    $_POST['ParentClass'] => ['attr1' => 'value1','attr2' => 'value2'],
+    // Has One
+    $_POST['RelatedClass'] => ['relAttr1' => 'value1','relAttr2' => 'value2'], 
+    // Has Many
+    $_POST['RelatedClass'] => Array
+        (
+            [0] => Array
+                (
+                    [attr1] => value1
+                    [attr2] => value2
+                )
+            [1] => Array
+                (
+                    [attr1] => value1
+                    [attr2] => value2
+                )
+        )      
 )
 ```
 
