@@ -74,30 +74,31 @@ Array (
 )
 
 OR
-
-$_POST['ParentClass'] = Array 
-    (
-        [attr1] => value1
-        [attr2] => value2 
-        // has many
-        [relationName] => Array 
-            ( 
-                [0] => Array 
-                    (
-                        [relAttr] => relValue1
-                    )
-                [1] => Array 
-                    (
-                        [relAttr] => relValue1
-                    )
-            )
-        // has one
-        [relationName] => Array
-            ( 
-                [relAttr1] => relValue1
-                [relAttr2] => relValue2
-            )
-    );
+Array (
+    $_POST['ParentClass'] => Array 
+        (
+            [attr1] => value1
+            [attr2] => value2 
+            // has many
+            [relationName] => Array 
+                ( 
+                    [0] => Array 
+                        (
+                            [relAttr] => relValue1
+                        )
+                    [1] => Array 
+                        (
+                            [relAttr] => relValue1
+                        )
+                )
+            // has one
+            [relationName] => Array
+                ( 
+                    [relAttr1] => relValue1
+                    [relAttr2] => relValue2
+                )
+        )
+)
 ```
 
 ```php
