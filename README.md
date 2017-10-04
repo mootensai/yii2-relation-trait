@@ -18,6 +18,9 @@ Best work with [mootensai/yii2-enhanced-gii](https://github.com/mootensai/yii2-e
 
 https://www.paypal.me/yohanesc
 
+Endorse me on LinkedIn
+
+https://www.linkedin.com/in/yohanes-candrajaya-b68394102/
 
 ## Installation
 
@@ -51,6 +54,34 @@ class MyModel extends ActiveRecord{
 It takes a normal array of POST. This is the example
 ```php
 Array (
+    $_POST['ParentClass'] => Array 
+        (
+            [attr1] => value1
+            [attr2] => value2 
+            // has many
+            [relationName] => Array 
+                ( 
+                    [0] => Array 
+                        (
+                            [relAttr] => relValue1
+                        )
+                    [1] => Array 
+                        (
+                            [relAttr] => relValue1
+                        )
+                )
+            // has one
+            [relationName] => Array
+                ( 
+                    [relAttr1] => relValue1
+                    [relAttr2] => relValue2
+                )
+        )
+)
+
+OR
+
+Array (
     $_POST['ParentClass'] => ['attr1' => 'value1','attr2' => 'value2'],
     // Has One
     $_POST['RelatedClass'] => ['relAttr1' => 'value1','relAttr2' => 'value2'], 
@@ -69,32 +100,6 @@ Array (
                 )
         )      
 )
-
-OR
-
-$_POST['ParentClass'] = Array 
-    (
-        [attr1] => value1
-        [attr2] => value2 
-        // has many
-        [relationName] => Array 
-            ( 
-                [0] => Array 
-                    (
-                        [relAttr] => relValue1
-                    )
-                [1] => Array 
-                    (
-                        [relAttr] => relValue1
-                    )
-            )
-        // has one
-        [relationName] => Array
-            ( 
-                [relAttr1] => relValue1
-                [relAttr2] => relValue2
-            )
-    );
 ```
 
 ```php
