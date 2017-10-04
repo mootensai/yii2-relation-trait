@@ -71,7 +71,7 @@ trait RelationTrait
                                     continue;
                                 }
 
-                                return $this->loadToRelation($isHasMany, $relName, $relAttr);
+                                $this->loadToRelation($isHasMany, $relName, $relAttr);
                             }
                         }
                     } else {
@@ -81,10 +81,11 @@ trait RelationTrait
                             continue;
                         }
 
-                        return $this->loadToRelation($isHasMany, $relName, $attr);
+                        $this->loadToRelation($isHasMany, $relName, $attr);
                     }
                 }
             }
+            return true;
         }
         return false;
     }
