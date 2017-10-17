@@ -491,7 +491,7 @@ trait RelationTrait
                         $stack[$name]['link'] = $rel->link;
                         $stack[$name]['via'] = $rel->via;
                     }
-                } catch (ErrorException $exc) {
+                } catch (\Exception $exc) {
                     //if method name can't be called,
                 }
             }
