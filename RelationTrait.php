@@ -10,7 +10,6 @@
 namespace mootensai\relation;
 
 use Yii;
-use yii\base\ErrorException;
 use yii\db\ActiveQuery;
 use \yii\db\ActiveRecord;
 use \yii\db\Exception;
@@ -478,6 +477,9 @@ trait RelationTrait
                     continue;
                 }
                 if (strpos($method->name, 'get') !== 0) {
+                    continue;
+                }
+                if($method->getNumberOfParameters() > 0) {
                     continue;
                 }
                 try {
