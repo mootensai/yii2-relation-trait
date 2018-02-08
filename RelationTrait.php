@@ -178,6 +178,14 @@ trait RelationTrait
                             $notDeletedFK = [];
                             $relPKAttr = ($AQ->multiple) ? $records[0]->primaryKey() : $records->primaryKey();
                             $isManyMany = (count($relPKAttr) > 1);
+                            $conditions = [];
+                            if (!empty($AQ->on)) {
+                                $conditions[] = $AQ->on;
+                            }
+
+                            if (!empty($AQ->where)) {
+                                $conditions[] = $AQ->where;
+                            }
                             if ($AQ->multiple) {
                                 /* @var $relModel ActiveRecord */
                                 foreach ($records as $index => $relModel) {
@@ -209,6 +217,11 @@ trait RelationTrait
                                             $notIn = ['not in', $attr, $value];
                                             array_push($query, $notIn);
                                         }
+                                        if (!empty($conditions)) {
+                                            foreach ($conditions as $condition) {
+                                                array_push($query, $condition);
+                                            }
+                                        }
                                         try {
                                             if ($isSoftDelete) {
                                                 $relModel->updateAll($this->_rt_softdelete, $query);
@@ -222,6 +235,11 @@ trait RelationTrait
                                     } else {
                                         // Has Many
                                         $query = ['and', $notDeletedFK, ['not in', $relPKAttr[0], $notDeletedPK]];
+                                        if (!empty($conditions)) {
+                                            foreach ($conditions as $condition) {
+                                                array_push($query, $condition);
+                                            }
+                                        }
                                         if (!empty($notDeletedPK)) {
                                             try {
                                                 if ($isSoftDelete) {
