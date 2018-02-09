@@ -1,4 +1,9 @@
 # yii2-relation-trait
+
+##I am not the creator of this extension, I have made a bug fix and made a pull request. I am just publishing this for my own usage. Feel free to use it.
+
+##All thanks to @mootensai for creating the extension.
+
 Yii 2 Models add functionality for load with relation (loadAll($POST)), &amp; transactional save with relation (saveAll())
 
 PLUS soft delete/restore feature!
