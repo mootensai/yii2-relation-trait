@@ -21,7 +21,7 @@
     },
     "autoload": {
 	"psr-4": {
-	    "mootensai\\relation\\": ""
+	    "deadmantfa\\relation\\": ""
 	}
     }
 }
