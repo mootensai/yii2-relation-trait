@@ -3,7 +3,7 @@
     "type": "yii2-extension",
     "description": "Yii 2 Models load with relation, & transaction save with relation",
     "keywords": ["Yii2","relation","load","save","transaction","loadwithrelation", "savewithrelation", "related", "saveall", "loadall"],
-    "homepage": "http://github.com/mootensai/yii2-relation-trait",
+    "homepage": "http://github.com/deadmantfa/yii2-relation-trait",
     "license": "BSD-3-Clause",
     "support": {
         "issues": "https://github.com/deadmantfa/yii2-relation-trait/issues",

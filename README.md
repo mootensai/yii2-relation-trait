@@ -36,13 +36,13 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```bash
-$ composer require 'mootensai/yii2-relation-trait:dev-master'
+$ composer require 'deadmantfa/yii2-relation-trait:dev-master'
 ```
 
 or add
 
 ```
-"mootensai/yii2-relation-trait": "*"
+"deadmantfa/yii2-relation-trait": "*"
 ```
 
 to the `require` section of your `composer.json` file.
@@ -52,7 +52,7 @@ to the `require` section of your `composer.json` file.
 
 ```php
 class MyModel extends ActiveRecord{
-    use \mootensai\relation\RelationTrait;
+    use \deadmantfa\relation\RelationTrait;
 }
 ```
 
