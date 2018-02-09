@@ -6,13 +6,17 @@
     "homepage": "http://github.com/mootensai/yii2-relation-trait",
     "license": "BSD-3-Clause",
     "support": {
-        "issues": "https://github.com/mootensai/yii2-relation-trait/issues",
-        "source": "https://github.com/mootensai/yii2-relation-trait"
+        "issues": "https://github.com/deadmantfa/yii2-relation-trait/issues",
+        "source": "https://github.com/deadmantfa/yii2-relation-trait"
     },
     "authors": [
         {
             "name": "Yohanes Candrajaya",
             "email": "moo.tensai@gmail.com"
+        },
+        {
+            "name": "Wenceslaus Dsilva",
+            "email": "wenceslausdsilva@gmail.com"
         }
     ],
     "require": {
