@@ -1,5 +1,5 @@
 {
-    "name": "mootensai/yii2-relation-trait",
+    "name": "deadmantfa/yii2-relation-trait",
     "type": "yii2-extension",
     "description": "Yii 2 Models load with relation, & transaction save with relation",
     "keywords": ["Yii2","relation","load","save","transaction","loadwithrelation", "savewithrelation", "related", "saveall", "loadall"],
