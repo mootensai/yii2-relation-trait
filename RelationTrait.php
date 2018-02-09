@@ -7,7 +7,7 @@
  * @since 1.0
  */
 
-namespace mootensai\relation;
+namespace deadmantfa\relation;
 
 use Yii;
 use yii\db\ActiveQuery;
