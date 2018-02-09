@@ -4,6 +4,8 @@
 
 ##All thanks to @mootensai for creating the extension.
 
+##This is not to replace the package maintained by @mootensai
+
 Yii 2 Models add functionality for load with relation (loadAll($POST)), &amp; transactional save with relation (saveAll())
 
 PLUS soft delete/restore feature!
