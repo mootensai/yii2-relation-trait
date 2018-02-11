@@ -289,36 +289,27 @@ trait RelationTrait
                     }
                 }
 
-                //No Children left
-                $relAvail = array_keys($this->relatedRecords);
-                $relData = $this->getRelationData();
-                $allRel = array_keys($relData);
-                $noChildren = array_diff($allRel, $relAvail);
+                if (!$isNewRecord) {
+                    //No Children left
+                    $relAvail = array_keys($this->relatedRecords);
+                    $relData = $this->getRelationData();
+                    $allRel = array_keys($relData);
+                    $noChildren = array_diff($allRel, $relAvail);
 
-                foreach ($noChildren as $relName) {
-                    /* @var $relModel ActiveRecord */
-                    if (empty($relData[$relName]['via']) && !in_array($relName, $skippedRelations)) {
-                        $relModel = new $relData[$relName]['modelClass'];
-                        $condition = [];
-                        $isManyMany = count($relModel->primaryKey()) > 1;
-                        if ($isManyMany) {
-                            foreach ($relData[$relName]['link'] as $k => $v) {
-                                $condition[$k] = $this->$v;
-                            }
-                            try {
-                                if ($isSoftDelete) {
-                                    $relModel->updateAll($this->_rt_softdelete, ['and', $condition]);
-                                } else {
-                                    $relModel->deleteAll(['and', $condition]);
-                                }
-                            } catch (IntegrityException $exc) {
-                                $this->addError($relData[$relName]['name'], Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
-                                $error = true;
-                            }
-                        } else {
-                            if ($relData[$relName]['ismultiple']) {
+                    foreach ($noChildren as $relName) {
+                        /* @var $relModel ActiveRecord */
+                        if (empty($relData[$relName]['via']) && !in_array($relName, $skippedRelations)) {
+                            $relModel = new $relData[$relName]['modelClass'];
+                            $condition = [];
+                            $isManyMany = count($relModel->primaryKey()) > 1;
+                            if ($isManyMany) {
                                 foreach ($relData[$relName]['link'] as $k => $v) {
                                     $condition[$k] = $this->$v;
+                                }
+                                if (!empty($relData[$relName]['where'])) {
+                                    foreach ($relData[$relName]['where'] as $k => $v) {
+                                        $condition[$k] = $v;
+                                    }
                                 }
                                 try {
                                     if ($isSoftDelete) {
@@ -330,11 +321,31 @@ trait RelationTrait
                                     $this->addError($relData[$relName]['name'], Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
                                     $error = true;
                                 }
+                            } else {
+                                if ($relData[$relName]['ismultiple']) {
+                                    foreach ($relData[$relName]['link'] as $k => $v) {
+                                        $condition[$k] = $this->$v;
+                                    }
+                                    if (!empty($relData[$relName]['where'])) {
+                                        foreach ($relData[$relName]['where'] as $k => $v) {
+                                            $condition[$k] = $v;
+                                        }
+                                    }
+                                    try {
+                                        if ($isSoftDelete) {
+                                            $relModel->updateAll($this->_rt_softdelete, ['and', $condition]);
+                                        } else {
+                                            $relModel->deleteAll(['and', $condition]);
+                                        }
+                                    } catch (IntegrityException $exc) {
+                                        $this->addError($relData[$relName]['name'], Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
+                                        $error = true;
+                                    }
+                                }
                             }
                         }
                     }
                 }
-
 
                 if ($error) {
                     $trans->rollback();
@@ -475,6 +486,15 @@ trait RelationTrait
                 $stack[$name]['modelClass'] = $rel->modelClass;
                 $stack[$name]['link'] = $rel->link;
                 $stack[$name]['via'] = $rel->via;
+                $stack[$name]['where'] = [];
+
+                if (!empty($rel->on)) {
+                    $stack[$name]['where'] = $rel->on;
+                }
+
+                if (!empty($rel->where)) {
+                    $stack[$name]['where'] = $rel->where;
+                }
             }
         } else {
             $ARMethods = get_class_methods('\yii\db\ActiveRecord');
@@ -510,6 +530,15 @@ trait RelationTrait
                         $stack[$name]['modelClass'] = $rel->modelClass;
                         $stack[$name]['link'] = $rel->link;
                         $stack[$name]['via'] = $rel->via;
+                        $stack[$name]['where'] = [];
+
+                        if (!empty($rel->on)) {
+                            $stack[$name]['where'] = $rel->on;
+                        }
+
+                        if (!empty($rel->where)) {
+                            $stack[$name]['where'] = $rel->where;
+                        }
                     }
                 } catch (\Exception $exc) {
                     //if method name can't be called,
