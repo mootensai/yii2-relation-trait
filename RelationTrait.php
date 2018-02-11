@@ -288,6 +288,7 @@ trait RelationTrait
                         }
                     }
                 }
+
                 if (!$isNewRecord) {
                     //No Children left
                     $relAvail = array_keys($this->relatedRecords);
