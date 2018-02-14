@@ -347,6 +347,7 @@ trait RelationTrait
 //                    }
 //                }
 
+
                 if ($error) {
                     $trans->rollback();
                     $this->isNewRecord = $isNewRecord;
