@@ -403,7 +403,7 @@ trait RelationTrait
      */
     public function restoreWithRelated($skippedRelations = [])
     {
-        if (!isset($this->_rt_softrestore)) {
+        if (!$this->hasProperty('_rt_softrestore')) {
             return false;
         }
 
