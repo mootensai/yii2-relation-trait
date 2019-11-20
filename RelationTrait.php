@@ -212,7 +212,7 @@ trait RelationTrait
                                 $condition[] = "$k = '{$this->$v}'";
                             }
                             try {
-                                $relModel->deleteAll(implode(" AND ", $condition));
+                                //$relModel->deleteAll(implode(" AND ", $condition));
                             } catch (\yii\db\IntegrityException $exc) {
                                 $this->addError($relData[$relName]['name'], \Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
                                 $error = true;
@@ -225,7 +225,7 @@ trait RelationTrait
                                 try {
                                     $relModel->deleteAll(implode(" AND ", $condition));
                                 } catch (\yii\db\IntegrityException $exc) {
-                                    $this->addError($relData[$relName]['name'], \Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
+                                    $this->addError($relData[$relName]['name'], \Yii::t('app', "Data can't be deleted because it's still used by another data."));
                                     $error = true;
                                 }
                             }
