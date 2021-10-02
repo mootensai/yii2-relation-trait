@@ -482,6 +482,9 @@ trait RelationTrait
                 if($method->getNumberOfParameters() > 0) {
                     continue;
                 }
+                if((string)$method->getReturnType() !== ActiveQueryInterface::class){
+                    continue;
+                }
                 try {
                     $rel = call_user_func(array($this, $method->name));
                     if ($rel instanceof ActiveQuery) {
