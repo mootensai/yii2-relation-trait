@@ -161,7 +161,7 @@ trait RelationTrait
         $db = $this->getDb();
         $trans = $db->beginTransaction();
         $isNewRecord = $this->isNewRecord;
-        $isSoftDelete = isset($this->_rt_softdelete);
+        $isSoftDelete = $this->hasProperty('_rt_softdelete');
         try {
             if ($this->save()) {
                 $error = false;
@@ -347,7 +347,7 @@ trait RelationTrait
         /* @var $this ActiveRecord */
         $db = $this->getDb();
         $trans = $db->beginTransaction();
-        $isSoftDelete = isset($this->_rt_softdelete);
+        $isSoftDelete = $this->hasProperty('_rt_softdelete');
         try {
             $error = false;
             $relData = $this->getRelationData();
@@ -403,7 +403,7 @@ trait RelationTrait
      */
     public function restoreWithRelated($skippedRelations = [])
     {
-        if (!isset($this->_rt_softrestore)) {
+        if (!$this->hasProperty('_rt_softrestore')) {
             return false;
         }
 
