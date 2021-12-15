@@ -7,7 +7,7 @@
  * @since 1.0
  */
 
-namespace mootensai\relation;
+namespace deadmantfa\relation;
 
 use Yii;
 use yii\db\ActiveQuery;
@@ -178,6 +178,14 @@ trait RelationTrait
                             $notDeletedFK = [];
                             $relPKAttr = ($AQ->multiple) ? $records[0]->primaryKey() : $records->primaryKey();
                             $isManyMany = (count($relPKAttr) > 1);
+                            $conditions = [];
+                            if (!empty($AQ->on)) {
+                                $conditions[] = $AQ->on;
+                            }
+
+                            if (!empty($AQ->where)) {
+                                $conditions[] = $AQ->where;
+                            }
                             if ($AQ->multiple) {
                                 /* @var $relModel ActiveRecord */
                                 foreach ($records as $index => $relModel) {
@@ -209,6 +217,11 @@ trait RelationTrait
                                             $notIn = ['not in', $attr, $value];
                                             array_push($query, $notIn);
                                         }
+                                        if (!empty($conditions)) {
+                                            foreach ($conditions as $condition) {
+                                                array_push($query, $condition);
+                                            }
+                                        }
                                         try {
                                             if ($isSoftDelete) {
                                                 $relModel->updateAll($this->_rt_softdelete, $query);
@@ -222,6 +235,11 @@ trait RelationTrait
                                     } else {
                                         // Has Many
                                         $query = ['and', $notDeletedFK, ['not in', $relPKAttr[0], $notDeletedPK]];
+                                        if (!empty($conditions)) {
+                                            foreach ($conditions as $condition) {
+                                                array_push($query, $condition);
+                                            }
+                                        }
                                         if (!empty($notDeletedPK)) {
                                             try {
                                                 if ($isSoftDelete) {
@@ -271,52 +289,63 @@ trait RelationTrait
                     }
                 }
 
-                //No Children left
-                $relAvail = array_keys($this->relatedRecords);
-                $relData = $this->getRelationData();
-                $allRel = array_keys($relData);
-                $noChildren = array_diff($allRel, $relAvail);
-
-                foreach ($noChildren as $relName) {
-                    /* @var $relModel ActiveRecord */
-                    if (empty($relData[$relName]['via']) && !in_array($relName, $skippedRelations)) {
-                        $relModel = new $relData[$relName]['modelClass'];
-                        $condition = [];
-                        $isManyMany = count($relModel->primaryKey()) > 1;
-                        if ($isManyMany) {
-                            foreach ($relData[$relName]['link'] as $k => $v) {
-                                $condition[$k] = $this->$v;
-                            }
-                            try {
-                                if ($isSoftDelete) {
-                                    $relModel->updateAll($this->_rt_softdelete, ['and', $condition]);
-                                } else {
-                                    $relModel->deleteAll(['and', $condition]);
-                                }
-                            } catch (IntegrityException $exc) {
-                                $this->addError($relData[$relName]['name'], Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
-                                $error = true;
-                            }
-                        } else {
-                            if ($relData[$relName]['ismultiple']) {
-                                foreach ($relData[$relName]['link'] as $k => $v) {
-                                    $condition[$k] = $this->$v;
-                                }
-                                try {
-                                    if ($isSoftDelete) {
-                                        $relModel->updateAll($this->_rt_softdelete, ['and', $condition]);
-                                    } else {
-                                        $relModel->deleteAll(['and', $condition]);
-                                    }
-                                } catch (IntegrityException $exc) {
-                                    $this->addError($relData[$relName]['name'], Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
-                                    $error = true;
-                                }
-                            }
-                        }
-                    }
-                }
-
+//                if (!$isNewRecord) {
+//                    //No Children left
+//                    $relAvail = array_keys($this->relatedRecords);
+//                    $relData = $this->getRelationData();
+//                    $allRel = array_keys($relData);
+//                    $noChildren = array_diff($allRel, $relAvail);
+//
+//                    foreach ($noChildren as $relName) {
+//                        /* @var $relModel ActiveRecord */
+//                        if (empty($relData[$relName]['via']) && !in_array($relName, $skippedRelations)) {
+//                            $relModel = new $relData[$relName]['modelClass'];
+//                            $condition = [];
+//                            $isManyMany = count($relModel->primaryKey()) > 1;
+//                            if ($isManyMany) {
+//                                foreach ($relData[$relName]['link'] as $k => $v) {
+//                                    $condition[$k] = $this->$v;
+//                                }
+//                                if (!empty($relData[$relName]['where'])) {
+//                                    foreach ($relData[$relName]['where'] as $k => $v) {
+//                                        $condition[$k] = $v;
+//                                    }
+//                                }
+//                                try {
+//                                    if ($isSoftDelete) {
+//                                        $relModel->updateAll($this->_rt_softdelete, ['and', $condition]);
+//                                    } else {
+//                                        $relModel->deleteAll(['and', $condition]);
+//                                    }
+//                                } catch (IntegrityException $exc) {
+//                                    $this->addError($relData[$relName]['name'], Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
+//                                    $error = true;
+//                                }
+//                            } else {
+//                                if ($relData[$relName]['ismultiple']) {
+//                                    foreach ($relData[$relName]['link'] as $k => $v) {
+//                                        $condition[$k] = $this->$v;
+//                                    }
+//                                    if (!empty($relData[$relName]['where'])) {
+//                                        foreach ($relData[$relName]['where'] as $k => $v) {
+//                                            $condition[$k] = $v;
+//                                        }
+//                                    }
+//                                    try {
+//                                        if ($isSoftDelete) {
+//                                            $relModel->updateAll($this->_rt_softdelete, ['and', $condition]);
+//                                        } else {
+//                                            $relModel->deleteAll(['and', $condition]);
+//                                        }
+//                                    } catch (IntegrityException $exc) {
+//                                        $this->addError($relData[$relName]['name'], Yii::t('mtrelt', "Data can't be deleted because it's still used by another data."));
+//                                        $error = true;
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
 
                 if ($error) {
                     $trans->rollback();
@@ -457,6 +486,15 @@ trait RelationTrait
                 $stack[$name]['modelClass'] = $rel->modelClass;
                 $stack[$name]['link'] = $rel->link;
                 $stack[$name]['via'] = $rel->via;
+                $stack[$name]['where'] = [];
+
+                if (!empty($rel->on)) {
+                    $stack[$name]['where'] = $rel->on;
+                }
+
+                if (!empty($rel->where)) {
+                    $stack[$name]['where'] = $rel->where;
+                }
             }
         } else {
             $ARMethods = get_class_methods('\yii\db\ActiveRecord');
@@ -495,6 +533,15 @@ trait RelationTrait
                         $stack[$name]['modelClass'] = $rel->modelClass;
                         $stack[$name]['link'] = $rel->link;
                         $stack[$name]['via'] = $rel->via;
+                        $stack[$name]['where'] = [];
+
+                        if (!empty($rel->on)) {
+                            $stack[$name]['where'] = $rel->on;
+                        }
+
+                        if (!empty($rel->where)) {
+                            $stack[$name]['where'] = $rel->where;
+                        }
                     }
                 } catch (\Exception $exc) {
                     //if method name can't be called,
